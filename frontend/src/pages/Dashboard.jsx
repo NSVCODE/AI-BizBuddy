@@ -388,7 +388,10 @@ function FAQManager({ businessId }) {
       await createFAQ(question.trim(), answer.trim(), businessId)
       setQuestion(''); setAnswer('')
       await load()
-    } catch { /* silent */ }
+    } catch (err) {
+      console.error('FAQ create error:', err)
+      alert('Failed to save FAQ: ' + (err?.response?.data?.detail || err.message || 'Unknown error'))
+    }
     finally { setSaving(false) }
   }
 

@@ -61,17 +61,26 @@ const TYPE_CONFIG = {
 
 export default function Home() {
   const [business, setBusiness] = useState(null)
+  const [faqs, setFaqs] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Support ?id=<business_id> or ?user=<user_id> in the URL for multi-tenant demos
     const params = new URLSearchParams(window.location.search)
     const id = params.get('id')
     const user = params.get('user')
     const query = id ? `?id=${id}` : user ? `?user_id=${user}` : ''
     fetch(`/api/business/profile${query}`)
       .then(r => r.json())
-      .then(data => { setBusiness(data); setLoading(false) })
+      .then(data => {
+        setBusiness(data)
+        setLoading(false)
+        if (data?.id) {
+          fetch(`/api/faqs?business_id=${data.id}`)
+            .then(r => r.json())
+            .then(f => setFaqs(f.filter(x => x.is_active)))
+            .catch(() => {})
+        }
+      })
       .catch(() => setLoading(false))
   }, [])
 
@@ -247,6 +256,28 @@ export default function Home() {
           <div key={label} style={{ fontSize: '13px', fontWeight: '500', opacity: 0.85 }}>{label}</div>
         ))}
       </section>
+
+      {/* FAQ Section */}
+      {faqs.length > 0 && (
+        <section style={{ padding: '80px 48px', background: 'var(--subtle)', borderTop: '1px solid var(--border)' }}>
+          <div style={{ maxWidth: '720px', margin: '0 auto' }}>
+            <div style={{ fontSize: '12px', fontWeight: '600', color: 'var(--navy-muted)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '10px' }}>
+              FAQs
+            </div>
+            <h2 style={{ fontSize: '34px', color: 'var(--navy)', fontWeight: '700', letterSpacing: '-0.5px', fontFamily: 'var(--font-display)', marginBottom: '40px' }}>
+              Common Questions
+            </h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {faqs.map(faq => (
+                <div key={faq.id} style={{ background: 'white', borderRadius: '12px', padding: '24px', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--border)' }}>
+                  <div style={{ fontWeight: '700', color: 'var(--navy)', marginBottom: '8px', fontSize: '15px' }}>{faq.question}</div>
+                  <div style={{ color: 'var(--text-secondary)', fontSize: '14px', lineHeight: '1.7' }}>{faq.answer}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Contact Section */}
       {(phone || email || location) && (
