@@ -13,7 +13,11 @@ export default function ChatBubble({ onClick, isOpen, unreadCount }) {
   const [emoji, setEmoji] = useState('💬')
 
   useEffect(() => {
-    fetch('/api/business/profile')
+    const params = new URLSearchParams(window.location.search)
+    const id = params.get('id')
+    const user = params.get('user')
+    const query = id ? `?id=${id}` : user ? `?user_id=${user}` : ''
+    fetch(`/api/business/profile${query}`)
       .then(r => r.json())
       .then(data => setEmoji(TYPE_EMOJI[data?.type] || '💬'))
       .catch(() => {})

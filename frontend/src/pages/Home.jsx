@@ -223,13 +223,13 @@ export default function Home() {
                 borderRadius: '12px',
                 background: i % 2 === 0 ? 'var(--navy)' : 'var(--subtle)',
                 display: 'flex', flexDirection: 'column',
-                alignItems: 'flex-start', justifyContent: 'flex-end',
-                padding: '18px',
+                alignItems: 'center', justifyContent: 'center',
+                padding: '18px', textAlign: 'center',
                 transform: i % 2 === 0 ? 'translateY(0)' : 'translateY(16px)',
                 boxShadow: 'var(--shadow-md)',
               }}>
-                <div style={{ fontWeight: '700', fontSize: '13px', color: i % 2 === 0 ? 'white' : 'var(--navy)', marginBottom: '4px' }}>{label}</div>
-                <div style={{ fontSize: '11px', color: i % 2 === 0 ? 'rgba(255,255,255,0.6)' : 'var(--text-secondary)', lineHeight: 1.3 }}>{sub}</div>
+                <div style={{ fontWeight: '700', fontSize: '17px', color: i % 2 === 0 ? 'white' : 'var(--navy)', marginBottom: '6px' }}>{label}</div>
+                <div style={{ fontSize: '13px', color: i % 2 === 0 ? 'rgba(255,255,255,0.7)' : 'var(--text-secondary)', lineHeight: 1.3 }}>{sub}</div>
               </div>
             ))}
           </div>

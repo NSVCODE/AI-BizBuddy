@@ -102,7 +102,11 @@ export default function ChatWindow({ onNewMessage }) {
   const inputRef = useRef(null)
 
   useEffect(() => {
-    fetch('/api/business/profile')
+    const params = new URLSearchParams(window.location.search)
+    const id = params.get('id')
+    const user = params.get('user')
+    const query = id ? `?id=${id}` : user ? `?user_id=${user}` : ''
+    fetch(`/api/business/profile${query}`)
       .then(r => r.json())
       .then(data => {
         setBusiness(data)
