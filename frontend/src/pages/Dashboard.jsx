@@ -53,7 +53,7 @@ export default function Dashboard() {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [businessId])
 
   // Poll WhatsApp status
   const fetchWaStatus = useCallback(async () => {
