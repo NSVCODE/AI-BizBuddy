@@ -57,15 +57,17 @@ client.on('call', async (call) => {
   const from = call.from
   console.log(`[BizBuddy] Incoming call from ${from} — rejecting and sending auto-reply`)
 
-  // Reject and reply independently — reject can fail without blocking the message
   try { await call.reject() } catch (e) {
     console.warn('[BizBuddy] call.reject() failed (non-fatal):', e.message)
   }
 
+  // Wait for WhatsApp to finish processing the rejection before sending a message
+  await new Promise(resolve => setTimeout(resolve, 1500))
+
   try {
     await client.sendMessage(
       from,
-      "Sorry we couldn't attend your call! We're happy to help via text — how can I assist you today? 😊"
+      "Sorry we couldn't attend your call, I'm happy to help you over text! Please let me know how I may assist you"
     )
     console.log(`[BizBuddy] Call auto-reply sent to ${from}`)
   } catch (err) {
