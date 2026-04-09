@@ -107,6 +107,22 @@ client.on('message', async (message) => {
   // Ignore group messages and status updates
   if (message.isGroupMsg || message.from === 'status@broadcast') return
 
+  // Detect missed/rejected calls via call_log system message
+  if (message.type === 'call_log') {
+    const phone = message.from.replace('@c.us', '')
+    console.log(`[BizBuddy] Missed call detected from +${phone} — sending auto-reply`)
+    try {
+      await client.sendMessage(
+        message.from,
+        "Sorry we couldn't attend your call, I'm happy to help you over text! Please let me know how I may assist you"
+      )
+      console.log(`[BizBuddy] Missed call auto-reply sent to +${phone}`)
+    } catch (err) {
+      console.error('[BizBuddy] Missed call auto-reply error:', err.message)
+    }
+    return
+  }
+
   const phone = message.from.replace('@c.us', '')
   const sessionId = `wa_${phone.replace(/\D/g, '')}`
 
