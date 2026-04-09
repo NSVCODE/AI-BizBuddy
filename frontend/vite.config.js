@@ -14,6 +14,11 @@ export default defineConfig({
         target: 'http://localhost:3001',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/wa-api/, ''),
+      },
+      '/ig-api': {
+        target: 'http://localhost:3002',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/ig-api/, ''),
       }
     }
   }

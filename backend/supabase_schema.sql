@@ -50,6 +50,19 @@ create table if not exists bookings (
   created_at        timestamptz default now()
 );
 
+-- ── FAQs ─────────────────────────────────────────────────────
+create table if not exists faqs (
+  id          uuid primary key default gen_random_uuid(),
+  business_id uuid references businesses(id) on delete cascade,
+  question    text not null,
+  answer      text not null,
+  is_active   boolean not null default true,
+  created_at  timestamptz default now()
+);
+
+alter table faqs enable row level security;
+create policy "Public can read active faqs" on faqs for select using (true);
+
 -- ── Indexes ──────────────────────────────────────────────────
 create index if not exists idx_messages_conversation on messages(conversation_id);
 create index if not exists idx_leads_source on leads(source);

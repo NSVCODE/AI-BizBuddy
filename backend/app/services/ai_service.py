@@ -31,55 +31,99 @@ def get_anthropic_client() -> anthropic.Anthropic:
 
 # ── System Prompt ─────────────────────────────────────────────────────────────
 
+def _get_active_business() -> dict | None:
+    """Fetch the most recently registered business from Supabase."""
+    try:
+        db = get_supabase()
+        result = db.table("businesses").select("*").order("created_at", desc=True).limit(1).execute()
+        return result.data[0] if result.data else None
+    except Exception:
+        return None
+
+
+def _get_custom_faqs(business_id: str | None) -> list[dict]:
+    """Fetch custom FAQs from Supabase."""
+    if not business_id:
+        return []
+    try:
+        db = get_supabase()
+        result = (
+            db.table("faqs")
+            .select("question, answer")
+            .eq("business_id", business_id)
+            .eq("is_active", True)
+            .execute()
+        )
+        return result.data or []
+    except Exception:
+        return []
+
+
+TYPE_PERSONAS = {
+    "restaurant": "You are a warm, friendly AI assistant for {name}, a restaurant/café. Help customers with table reservations, menu questions, opening hours, and general inquiries. Keep responses concise and welcoming.",
+    "salon": "You are a friendly AI assistant for {name}, a salon/spa. Help customers book appointments, learn about services, check availability, and get pricing info. Be warm, professional, and helpful.",
+    "clinic": "You are a professional AI assistant for {name}, a healthcare clinic. Help patients book consultations, learn about services, and get general information. Be empathetic, clear, and professional.",
+    "retail": "You are a helpful AI assistant for {name}, a retail store. Help customers find products, get pricing, place enquiries, and learn about the store. Be friendly and informative.",
+    "service": "You are a helpful AI assistant for {name}, a service provider. Help customers book services, get quotes, and learn about available services. Be professional and efficient.",
+    "other": "You are a helpful AI assistant for {name}. Help customers with enquiries, bookings, and any information they need. Be friendly and professional.",
+}
+
+
 def build_system_prompt() -> str:
     cfg = RESTAURANT_CONFIG
-    persona = cfg["ai_persona"]
+    business = _get_active_business()
 
-    menu_text = ""
-    for category, items in cfg["menu"].items():
-        menu_text += f"\n**{category}:**\n"
-        for item in items:
-            menu_text += f"  - {item['name']} — ₹{item['price']}: {item['description']}\n"
+    # Use real business data if available, else fall back to LatteLune config
+    biz_name = business.get("name", cfg["name"]) if business else cfg["name"]
+    biz_type = business.get("type", "restaurant") if business else "restaurant"
+    biz_location = business.get("location", cfg["location"]) if business else cfg["location"]
+    biz_phone = business.get("phone", cfg["phone"]) if business else cfg["phone"]
+    biz_email = business.get("email", cfg.get("email", "")) if business else cfg.get("email", "")
+    biz_desc = business.get("description", cfg["description"]) if business else cfg["description"]
+    biz_id = business.get("id") if business else None
 
-    hours_text = "\n".join(f"  {day}: {hrs}" for day, hrs in cfg["hours"].items())
-    amenities_text = "\n".join(f"  - {a}" for a in cfg["amenities"])
-    faq_text = "\n".join(
-        f"  Q: {f['question']}\n  A: {f['answer']}" for f in cfg["faqs"]
-    )
+    persona_template = TYPE_PERSONAS.get(biz_type, TYPE_PERSONAS["other"])
+    persona_text = persona_template.format(name=biz_name)
+
+    # Custom FAQs from DB
+    custom_faqs = _get_custom_faqs(biz_id)
+
+    # For restaurants, include menu; for others use description only
+    extra_info = ""
+    if biz_type == "restaurant":
+        menu_text = ""
+        for category, items in cfg["menu"].items():
+            menu_text += f"\n**{category}:**\n"
+            for item in items:
+                menu_text += f"  - {item['name']} — ₹{item['price']}: {item['description']}\n"
+        hours_text = "\n".join(f"  {day}: {hrs}" for day, hrs in cfg["hours"].items())
+        extra_info = f"\n## Menu\n{menu_text}\n\n## Opening Hours\n{hours_text}"
+
+    # FAQs (custom from DB first, then static for restaurant fallback)
+    faq_list = custom_faqs if custom_faqs else (cfg["faqs"] if biz_type == "restaurant" else [])
+    faq_text = "\n".join(f"  Q: {f['question']}\n  A: {f['answer']}" for f in faq_list)
 
     return f"""
-{persona['personality']}
+{persona_text}
 
-## About LatteLune
-{cfg['description']}
-📍 {cfg['location']}
-📞 {cfg['phone']} | 📧 {cfg['email']}
+## About {biz_name}
+{biz_desc}
+📍 {biz_location}
+📞 {biz_phone}{f' | 📧 {biz_email}' if biz_email else ''}
+{extra_info}
+{"## FAQs" + chr(10) + faq_text if faq_text else ""}
 
-## Opening Hours
-{hours_text}
-
-## Menu
-{menu_text}
-
-## Amenities
-{amenities_text}
-
-## FAQs
-{faq_text}
-
-## Booking Policy
-- Parties of 1–{cfg['booking_slots']['max_party_size']} guests
-- Advance booking required at least {cfg['booking_slots']['min_advance_hours']} hour(s)
-- Available slots: {', '.join(cfg['booking_slots']['slot_times'])}
-- Each slot is 90 minutes
+## Booking / Appointment Policy
+- Collect: customer name, phone number, preferred date, preferred time, and number of guests/people
+- Ask for ALL details in ONE message — do not ask one by one
+- Use check_availability then create_booking once you have all details
+- Confirm with a clear summary
 
 ## How to handle conversations
-1. For general questions, answer using the information above.
-2. For bookings: use check_availability first, then create_booking once you have: name, phone, date, time, party size.
-3. For lead capture (catering/events/general inquiries): use capture_lead once you have name + phone.
-4. Collect info naturally — don't ask for everything at once.
-5. Always confirm bookings with a clear summary.
-6. Keep responses warm, concise, and friendly. Use occasional light emojis where natural.
+1. Answer general questions using the information above.
+2. For bookings/appointments: ask for ALL details in a single message, then book.
+3. For lead capture: use capture_lead once you have name + phone.
+4. Keep responses warm, concise, and friendly.
 """.strip()
 
 

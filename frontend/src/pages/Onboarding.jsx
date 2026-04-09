@@ -146,10 +146,7 @@ export default function Onboarding() {
           </div>
         )}
 
-        <div className="flex items-center justify-center gap-1.5 mt-6">
-          <span className="text-xs text-slate-700">Powered by</span>
-          <img src="/BizBuddy_Logo.png" alt="BizBuddy" className="h-4 w-auto opacity-50" />
-        </div>
+        <p className="text-center text-sm text-slate-500 mt-6">Powered by <span className="text-blue-400 font-semibold">Syntactic</span></p>
       </div>
     </div>
   )

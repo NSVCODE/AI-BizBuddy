@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import chat, leads, bookings, whatsapp, analytics
+from app.routers import chat, leads, bookings, whatsapp, analytics, business, faqs
 
 app = FastAPI(
     title="LatteLune AI BizBuddy API",
@@ -21,6 +21,8 @@ app.include_router(leads.router)
 app.include_router(bookings.router)
 app.include_router(whatsapp.router)
 app.include_router(analytics.router)
+app.include_router(business.router)
+app.include_router(faqs.router)
 
 
 @app.get("/")

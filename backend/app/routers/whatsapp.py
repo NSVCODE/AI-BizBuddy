@@ -8,6 +8,7 @@ from fastapi import APIRouter
 from app.models.schemas import WhatsAppMessage, MissedCallRequest, ChatResponse
 from app.services.ai_service import process_message
 from app.services.lead_service import get_or_create_lead_for_missed_call
+from app.db.supabase_client import get_supabase
 
 router = APIRouter(prefix="/api/whatsapp", tags=["whatsapp"])
 
@@ -21,14 +22,62 @@ def _get_session(phone: str) -> str:
     return _wa_sessions[phone]
 
 
+def _get_returning_customer_context(phone: str) -> str | None:
+    """
+    If this phone number belongs to a known lead with a name,
+    return a system context string so the AI greets them by name.
+    """
+    try:
+        db = get_supabase()
+        lead_res = db.table("leads").select("name, inquiry_type").eq("phone", phone).limit(1).execute()
+        if not lead_res.data:
+            return None
+        lead = lead_res.data[0]
+        name = lead.get("name")
+        if not name:
+            return None
+
+        # Check for past bookings
+        bk_res = (
+            db.table("bookings")
+            .select("date, time, party_size, status")
+            .eq("phone", phone)
+            .order("created_at", desc=True)
+            .limit(1)
+            .execute()
+        )
+        booking_note = ""
+        if bk_res.data:
+            b = bk_res.data[0]
+            booking_note = (
+                f" Their most recent booking was for {b['party_size']} guests "
+                f"on {b['date']} at {b['time']} (status: {b['status']})."
+            )
+
+        return (
+            f"[RETURNING CUSTOMER: This person's name is {name}. "
+            f"They have contacted us before.{booking_note} "
+            f"Greet them warmly by name at the start of your reply, "
+            f"e.g. 'Welcome back, {name}!' — then help them as usual.]"
+        )
+    except Exception:
+        return None
+
+
 @router.post("/simulate", response_model=ChatResponse)
 async def simulate_whatsapp_message(msg: WhatsAppMessage):
     """
     Simulate an incoming WhatsApp message.
     Returns AI response as if it came through WhatsApp Business API.
     """
+    is_new_session = msg.phone not in _wa_sessions
     session_id = msg.session_id or _get_session(msg.phone)
-    reply = process_message(session_id, msg.message, channel="whatsapp")
+    message = msg.message
+    if is_new_session:
+        ctx = _get_returning_customer_context(msg.phone)
+        if ctx:
+            message = f"{ctx}\n\n{msg.message}"
+    reply = process_message(session_id, message, channel="whatsapp")
     return ChatResponse(session_id=session_id, reply=reply, channel="whatsapp")
 
 

@@ -6,14 +6,16 @@ import LeadsTable from '../components/Dashboard/LeadsTable'
 import BookingsTable from '../components/Dashboard/BookingsTable'
 import ConversationsPanel from '../components/Dashboard/ConversationsPanel'
 import WhatsAppConnect from '../components/WhatsAppConnect/WhatsAppConnect'
-import { getAnalytics, getLeads, getBookings, getConversations } from '../services/api'
+import { getAnalytics, getLeads, getBookings, getConversations, getFAQs, createFAQ, updateFAQ, deleteFAQ } from '../services/api'
 
 const NAV = [
   { id: 'overview',       label: 'Overview',       icon: GridIcon },
   { id: 'whatsapp',       label: 'WhatsApp',        icon: MessageIcon },
+  { id: 'instagram',      label: 'Instagram',       icon: InstagramIcon },
   { id: 'leads',          label: 'Leads',           icon: UsersIcon },
   { id: 'bookings',       label: 'Bookings',        icon: CalendarIcon },
   { id: 'conversations',  label: 'Conversations',   icon: ChatIcon },
+  { id: 'faqs',           label: 'FAQs',            icon: FAQIcon },
 ]
 
 export default function Dashboard() {
@@ -26,6 +28,7 @@ export default function Dashboard() {
   const [conversations, setConversations] = useState([])
   const [loading, setLoading] = useState(true)
   const [waStatus, setWaStatus] = useState('offline')
+  const [igStatus, setIgStatus] = useState('offline')
 
   const fetchAll = useCallback(async () => {
     setLoading(true)
@@ -61,6 +64,16 @@ export default function Dashboard() {
     } catch { setWaStatus('offline') }
   }, [])
 
+  // Poll Instagram status
+  const fetchIgStatus = useCallback(async () => {
+    try {
+      const res = await fetch('/ig-api/status')
+      if (!res.ok) { setIgStatus('offline'); return }
+      const data = await res.json()
+      setIgStatus(data.status)
+    } catch { setIgStatus('offline') }
+  }, [])
+
   useEffect(() => { fetchAll() }, [fetchAll])
   useEffect(() => {
     const iv = setInterval(fetchAll, 30000)
@@ -71,6 +84,12 @@ export default function Dashboard() {
     const iv = setInterval(fetchWaStatus, 3000)
     return () => clearInterval(iv)
   }, [fetchWaStatus])
+
+  useEffect(() => {
+    fetchIgStatus()
+    const iv = setInterval(fetchIgStatus, 5000)
+    return () => clearInterval(iv)
+  }, [fetchIgStatus])
 
   const handleSignOut = async () => {
     await signOut()
@@ -86,9 +105,11 @@ export default function Dashboard() {
   const pageTitle = {
     overview: 'Overview',
     whatsapp: 'WhatsApp',
+    instagram: 'Instagram',
     leads: 'Leads',
     bookings: 'Bookings',
     conversations: 'Conversations',
+    faqs: 'Custom FAQs',
   }
 
   return (
@@ -97,8 +118,9 @@ export default function Dashboard() {
       {/* ── Sidebar ─────────────────────────────────────────────── */}
       <aside className="w-60 shrink-0 flex flex-col border-r border-white/[.07] bg-[#080C18]">
         {/* Brand */}
-        <div className="px-4 py-4 border-b border-white/[.07]">
-          <img src="/BizBuddy_Logo.png" alt="BizBuddy" className="h-16 w-auto" />
+        <div className="h-16 px-4 border-b border-white/[.07] flex items-center gap-2.5 shrink-0">
+          <img src="/favicon.png" alt="BizBuddy" className="h-9 w-9 shrink-0" />
+          <span className="font-bold text-2xl tracking-tight" style={{ fontFamily: "'Playfair Display', serif", color: '#2563EB' }}>BizBuddy</span>
         </div>
 
         {/* Nav */}
@@ -119,6 +141,13 @@ export default function Dashboard() {
                   <span className={`w-2 h-2 rounded-full shrink-0 ${
                     waStatus === 'connected' ? 'bg-green-400' :
                     waStatus === 'qr' || waStatus === 'connecting' ? 'bg-yellow-400' :
+                    'bg-slate-600'
+                  }`} />
+                )}
+                {item.id === 'instagram' && (
+                  <span className={`w-2 h-2 rounded-full shrink-0 ${
+                    igStatus === 'connected' ? 'bg-green-400' :
+                    igStatus === 'error' ? 'bg-red-500' :
                     'bg-slate-600'
                   }`} />
                 )}
@@ -147,7 +176,7 @@ export default function Dashboard() {
       {/* ── Main ────────────────────────────────────────────────── */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Top bar */}
-        <header className="shrink-0 px-8 py-4 border-b border-white/[.07] flex items-center justify-between">
+        <header className="h-16 shrink-0 px-8 border-b border-white/[.07] flex items-center justify-between">
           <div>
             <h1 className="text-white font-semibold text-lg tracking-tight">{pageTitle[active]}</h1>
           </div>
@@ -191,6 +220,12 @@ export default function Dashboard() {
             </div>
           )}
 
+          {active === 'instagram' && (
+            <div className="fade-in max-w-md">
+              <InstagramConnect igStatus={igStatus} />
+            </div>
+          )}
+
           {active === 'leads' && (
             <div className="fade-in">
               <div className="glass overflow-hidden">
@@ -210,6 +245,12 @@ export default function Dashboard() {
           {active === 'conversations' && (
             <div className="fade-in">
               <ConversationsPanel conversations={conversations} loading={loading} />
+            </div>
+          )}
+
+          {active === 'faqs' && (
+            <div className="fade-in max-w-2xl">
+              <FAQManager />
             </div>
           )}
 
@@ -275,5 +316,213 @@ function SignOutIcon({ size = 15, className = '' }) {
       <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
       <polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
     </svg>
+  )
+}
+function InstagramIcon({ size = 16, className = '' }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+      <circle cx="12" cy="12" r="4"/>
+      <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor"/>
+    </svg>
+  )
+}
+function FAQIcon({ size = 16, className = '' }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <circle cx="12" cy="12" r="10"/>
+      <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+      <line x1="12" y1="17" x2="12.01" y2="17" strokeWidth="2.5" strokeLinecap="round"/>
+    </svg>
+  )
+}
+
+// ── FAQ Manager ────────────────────────────────────────────────
+function FAQManager() {
+  const [faqs, setFaqs] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [question, setQuestion] = useState('')
+  const [answer, setAnswer] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [editId, setEditId] = useState(null)
+  const [editQ, setEditQ] = useState('')
+  const [editA, setEditA] = useState('')
+
+  const load = async () => {
+    try {
+      const data = await getFAQs()
+      setFaqs(data)
+    } catch { /* silent */ }
+    finally { setLoading(false) }
+  }
+
+  useEffect(() => { load() }, [])
+
+  const handleAdd = async () => {
+    if (!question.trim() || !answer.trim()) return
+    setSaving(true)
+    try {
+      await createFAQ(question.trim(), answer.trim())
+      setQuestion(''); setAnswer('')
+      await load()
+    } catch { /* silent */ }
+    finally { setSaving(false) }
+  }
+
+  const handleDelete = async (id) => {
+    await deleteFAQ(id)
+    setFaqs(f => f.filter(x => x.id !== id))
+  }
+
+  const startEdit = (faq) => {
+    setEditId(faq.id); setEditQ(faq.question); setEditA(faq.answer)
+  }
+
+  const handleSaveEdit = async () => {
+    await updateFAQ(editId, { question: editQ, answer: editA })
+    setEditId(null)
+    await load()
+  }
+
+  const handleToggle = async (faq) => {
+    await updateFAQ(faq.id, { is_active: !faq.is_active })
+    await load()
+  }
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="glass p-5 flex flex-col gap-4">
+        <h2 className="text-white font-semibold text-sm">Add New FAQ</h2>
+        <p className="text-slate-500 text-xs -mt-2">These appear in the AI's knowledge base and on your customer page.</p>
+        <input
+          className="input-dark"
+          placeholder="Question — e.g. Do you offer student discounts?"
+          value={question}
+          onChange={e => setQuestion(e.target.value)}
+        />
+        <textarea
+          className="input-dark"
+          placeholder="Answer"
+          rows={3}
+          style={{ resize: 'vertical' }}
+          value={answer}
+          onChange={e => setAnswer(e.target.value)}
+        />
+        <button
+          className="btn-primary"
+          onClick={handleAdd}
+          disabled={saving || !question.trim() || !answer.trim()}
+          style={{ width: 'auto', alignSelf: 'flex-start', padding: '0.5rem 1.25rem' }}
+        >
+          {saving ? 'Saving…' : 'Add FAQ'}
+        </button>
+      </div>
+
+      <div className="flex flex-col gap-3">
+        {loading && <p className="text-slate-500 text-sm">Loading…</p>}
+        {!loading && faqs.length === 0 && (
+          <p className="text-slate-500 text-sm">No custom FAQs yet. Add one above.</p>
+        )}
+        {faqs.map(faq => (
+          <div key={faq.id} className="glass p-4 flex flex-col gap-2">
+            {editId === faq.id ? (
+              <>
+                <input
+                  className="input-dark text-xs"
+                  value={editQ}
+                  onChange={e => setEditQ(e.target.value)}
+                />
+                <textarea
+                  className="input-dark text-xs"
+                  rows={3}
+                  style={{ resize: 'vertical' }}
+                  value={editA}
+                  onChange={e => setEditA(e.target.value)}
+                />
+                <div className="flex gap-2 mt-1">
+                  <button className="btn-primary text-xs" style={{ width: 'auto', padding: '0.35rem 1rem' }} onClick={handleSaveEdit}>Save</button>
+                  <button className="btn-ghost text-xs" style={{ width: 'auto', padding: '0.35rem 1rem' }} onClick={() => setEditId(null)}>Cancel</button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex items-start justify-between gap-4">
+                  <p className="text-white text-sm font-medium leading-snug">{faq.question}</p>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      title={faq.is_active ? 'Disable' : 'Enable'}
+                      onClick={() => handleToggle(faq)}
+                      className={`w-2 h-2 rounded-full transition-colors ${faq.is_active ? 'bg-green-400' : 'bg-slate-600'}`}
+                      style={{ padding: '6px', boxSizing: 'content-box' }}
+                    />
+                    <button onClick={() => startEdit(faq)} className="text-slate-500 hover:text-white transition-colors text-xs">Edit</button>
+                    <button onClick={() => handleDelete(faq.id)} className="text-slate-500 hover:text-red-400 transition-colors text-xs">Delete</button>
+                  </div>
+                </div>
+                <p className="text-slate-400 text-xs leading-relaxed">{faq.answer}</p>
+                {!faq.is_active && <span className="text-xs text-slate-600 italic">Disabled — hidden from AI and customers</span>}
+              </>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ── Instagram Connect Panel ────────────────────────────────────
+function InstagramConnect({ igStatus }) {
+  const configs = {
+    connected:      { color: 'bg-green-400', label: 'Connected' },
+    error:          { color: 'bg-red-500',   label: 'Error' },
+    no_credentials: { color: 'bg-yellow-400',label: 'Not configured' },
+    offline:        { color: 'bg-slate-600', label: 'Offline' },
+  }
+  const c = configs[igStatus] || configs.offline
+
+  return (
+    <div className="glass p-6 flex flex-col gap-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-white font-semibold text-base">Instagram DM Integration</h2>
+          <p className="text-slate-500 text-xs mt-0.5">Auto-reply to Instagram direct messages</p>
+        </div>
+        <div className="flex items-center gap-2 bg-white/[.05] border border-white/[.08] rounded-full px-3 py-1">
+          <div className={`w-1.5 h-1.5 rounded-full ${c.color}`} />
+          <span className="text-xs text-slate-400 font-medium">{c.label}</span>
+        </div>
+      </div>
+
+      <div className="border-t border-white/[.07]" />
+
+      {igStatus === 'connected' && (
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center gap-3 bg-green-500/10 border border-green-500/20 rounded-xl px-4 py-3">
+            <div className="w-2.5 h-2.5 rounded-full bg-green-400 shrink-0" />
+            <p className="text-green-400 text-sm font-semibold">Connected — DMs are being handled by AI</p>
+          </div>
+          <p className="text-slate-500 text-xs">All incoming Instagram DMs are automatically replied to by your AI assistant.</p>
+        </div>
+      )}
+
+      {(igStatus === 'offline' || igStatus === 'no_credentials' || igStatus === 'error') && (
+        <div className="flex flex-col gap-4">
+          <p className="text-slate-400 text-sm">
+            {igStatus === 'error'
+              ? 'Login failed — check your credentials in instagram-service/.env'
+              : 'Start the Instagram service with your credentials:'}
+          </p>
+          <div className="bg-black/40 border border-white/[.08] rounded-lg px-4 py-3 font-mono text-xs text-green-400 leading-loose">
+            cd instagram-service<br />
+            npm install<br />
+            <span className="text-slate-500"># Edit .env: set IG_USERNAME + IG_PASSWORD</span><br />
+            npm start
+          </div>
+          <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg px-4 py-3 text-xs text-yellow-400">
+            Use a dedicated Instagram account — not your personal one.
+          </div>
+        </div>
+      )}
+    </div>
   )
 }

@@ -53,12 +53,59 @@ client.on('disconnected', (reason) => {
   console.log('[BizBuddy] Disconnected:', reason)
 })
 
+client.on('call', async (call) => {
+  console.log(`[BizBuddy] Incoming call from ${call.from} — rejecting and sending auto-reply`)
+  try {
+    await call.reject()
+    await client.sendMessage(
+      call.from,
+      "Sorry we couldn't attend your call! We're happy to help via text! How may I assist you today?"
+    )
+  } catch (err) {
+    console.error('[BizBuddy] Call handler error:', err.message)
+  }
+})
+
+// ── Follow-up message logic ───────────────────────────────────────────────────
+// If a customer asks about services but doesn't book, send a nudge after 10s
+
+const pendingFollowUps = new Map() // phone → timeout handle
+
+const SERVICE_INQUIRY_KEYWORDS = [
+  'service', 'services', 'price', 'prices', 'pricing', 'cost', 'how much',
+  'menu', 'offer', 'available', 'appointment', 'book', 'session', 'treatment',
+  'haircut', 'facial', 'massage', 'manicure', 'pedicure', 'colour', 'color',
+  'consult', 'consultation', 'package', 'deal', 'hour', 'time', 'slot',
+]
+
+function looksLikeServiceInquiry(text) {
+  const lower = text.toLowerCase()
+  return SERVICE_INQUIRY_KEYWORDS.some(kw => lower.includes(kw))
+}
+
+function looksLikeBookingConfirmed(text) {
+  const lower = text.toLowerCase()
+  return (
+    lower.includes('confirm') ||
+    lower.includes('booking confirmed') ||
+    lower.includes('appointment confirmed') ||
+    lower.includes('booked') ||
+    lower.includes('reservation')
+  )
+}
+
 client.on('message', async (message) => {
   // Ignore group messages and status updates
   if (message.isGroupMsg || message.from === 'status@broadcast') return
 
   const phone = message.from.replace('@c.us', '')
   const sessionId = `wa_${phone.replace(/\D/g, '')}`
+
+  // Any new message from this customer cancels pending follow-up
+  if (pendingFollowUps.has(phone)) {
+    clearTimeout(pendingFollowUps.get(phone))
+    pendingFollowUps.delete(phone)
+  }
 
   console.log(`[BizBuddy] Message from +${phone}: ${message.body}`)
 
@@ -72,6 +119,27 @@ client.on('message', async (message) => {
     const reply = response.data.reply
     await client.sendMessage(message.from, reply)
     console.log(`[BizBuddy] Reply sent to +${phone}`)
+
+    // Schedule follow-up if the AI's reply mentions services but no booking yet
+    const shouldFollowUp =
+      looksLikeServiceInquiry(message.body) && !looksLikeBookingConfirmed(reply)
+
+    if (shouldFollowUp) {
+      const handle = setTimeout(async () => {
+        pendingFollowUps.delete(phone)
+        const followUp =
+          "Just checking in — were you able to find what you were looking for? I'd love to help you book an appointment or answer any questions! 😊"
+        try {
+          await client.sendMessage(message.from, followUp)
+          console.log(`[BizBuddy] Follow-up sent to +${phone}`)
+        } catch (err) {
+          console.error('[BizBuddy] Follow-up send error:', err.message)
+        }
+      }, 10_000) // 10 seconds for demo
+
+      pendingFollowUps.set(phone, handle)
+      console.log(`[BizBuddy] Follow-up scheduled for +${phone} in 10s`)
+    }
   } catch (err) {
     console.error('[BizBuddy] Error processing message:', err.message)
   }

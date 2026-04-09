@@ -48,4 +48,24 @@ export const simulateMissedCall = (phone, caller_name = null) =>
 export const getAnalytics = () =>
   api.get('/api/analytics/summary').then(r => r.data)
 
+// FAQs
+export const getFAQs = () =>
+  api.get('/api/faqs').then(r => r.data)
+
+export const createFAQ = (question, answer) =>
+  api.post('/api/faqs', { question, answer }).then(r => r.data)
+
+export const updateFAQ = (id, data) =>
+  api.put(`/api/faqs/${id}`, data).then(r => r.data)
+
+export const deleteFAQ = (id) =>
+  api.delete(`/api/faqs/${id}`).then(r => r.data)
+
+// Business profile
+export const getBusinessProfile = () =>
+  api.get('/api/business/profile').then(r => r.data)
+
+export const updateBusinessProfile = (data) =>
+  api.put('/api/business/profile', data).then(r => r.data)
+
 export default api
