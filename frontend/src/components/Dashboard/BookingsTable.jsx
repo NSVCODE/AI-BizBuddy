@@ -1,11 +1,11 @@
 import React, { useState } from 'react'
 import { updateBookingStatus, cancelBooking } from '../../services/api'
 
-const STATUS_STYLES = {
-  pending:   { bg: '#FFF7ED', text: '#C2410C', label: 'Pending' },
-  confirmed: { bg: '#F0FDF4', text: '#15803D', label: 'Confirmed' },
-  cancelled: { bg: '#FEF2F2', text: '#B91C1C', label: 'Cancelled' },
-  completed: { bg: '#F0F9FF', text: '#0369A1', label: 'Completed' },
+const STATUS = {
+  pending:   { label: 'Pending',   cls: 'bg-yellow-500/15 text-yellow-400 border-yellow-500/20' },
+  confirmed: { label: 'Confirmed', cls: 'bg-green-500/15 text-green-400 border-green-500/20' },
+  cancelled: { label: 'Cancelled', cls: 'bg-red-500/15 text-red-400 border-red-500/20' },
+  completed: { label: 'Completed', cls: 'bg-blue-500/15 text-blue-400 border-blue-500/20' },
 }
 
 export default function BookingsTable({ bookings, loading, onRefresh }) {
@@ -24,89 +24,67 @@ export default function BookingsTable({ bookings, loading, onRefresh }) {
     finally { setUpdating(null) }
   }
 
-  if (loading) return <div style={{ padding: '40px', textAlign: 'center', color: 'var(--gray-400)' }}>Loading bookings...</div>
-  if (!bookings?.length) return (
-    <div style={{ padding: '40px', textAlign: 'center', color: 'var(--gray-400)' }}>
-      <div style={{ fontSize: '40px', marginBottom: '8px' }}>📅</div>
-      <div>No bookings yet. Chat to make one!</div>
-    </div>
-  )
+  if (loading) return <div className="py-10 text-center text-sm text-slate-600">Loading...</div>
+  if (!bookings?.length) return <div className="py-10 text-center text-sm text-slate-600">No bookings yet.</div>
 
   return (
-    <div style={{ overflowX: 'auto' }}>
-      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
+    <div className="overflow-x-auto">
+      <table className="w-full">
         <thead>
-          <tr style={{ borderBottom: '2px solid var(--beige)', background: 'var(--gray-100)' }}>
-            {['Guest', 'Phone', 'Date & Time', 'Party', 'Status', 'Requests', 'Actions'].map(h => (
-              <th key={h} style={{
-                padding: '10px 14px', textAlign: 'left',
-                color: 'var(--gray-600)', fontWeight: '600',
-                fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.05em',
-              }}>{h}</th>
+          <tr className="border-b border-white/[.07]">
+            {['Guest', 'Phone', 'Date & Time', 'Guests', 'Status', 'Requests', 'Actions'].map(h => (
+              <th key={h} className="th">{h}</th>
             ))}
           </tr>
         </thead>
         <tbody>
-          {bookings.map((b, i) => {
-            const st = STATUS_STYLES[b.status] || STATUS_STYLES.pending
+          {bookings.map(b => {
+            const st = STATUS[b.status] || STATUS.pending
             const isToday = b.date === new Date().toISOString().slice(0, 10)
             return (
-              <tr key={b.id} style={{
-                borderBottom: '1px solid var(--beige)',
-                background: isToday ? '#FFFBEB' : i % 2 === 0 ? 'white' : 'var(--off-white)',
-              }}>
-                <td style={{ padding: '12px 14px', fontWeight: '500', color: 'var(--brown)' }}>
-                  {isToday && <span style={{ fontSize: '10px', background: 'var(--yellow)', color: 'var(--brown)', padding: '1px 6px', borderRadius: '10px', marginRight: '6px', fontWeight: '700' }}>TODAY</span>}
+              <tr key={b.id} className="tr">
+                <td className="td font-medium text-white">
+                  {isToday && (
+                    <span className="badge bg-blue-600/20 text-blue-400 border border-blue-500/20 mr-2">Today</span>
+                  )}
                   {b.customer_name}
                 </td>
-                <td style={{ padding: '12px 14px', fontFamily: 'monospace', fontSize: '13px', color: 'var(--gray-600)' }}>{b.phone}</td>
-                <td style={{ padding: '12px 14px', whiteSpace: 'nowrap' }}>
-                  <div style={{ fontWeight: '600', color: 'var(--gray-800)' }}>
+                <td className="td font-mono text-xs">{b.phone}</td>
+                <td className="td whitespace-nowrap">
+                  <div className="text-white text-sm font-medium">
                     {new Date(b.date + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                   </div>
-                  <div style={{ color: 'var(--blue)', fontSize: '13px' }}>⏰ {b.time?.slice(0,5)}</div>
+                  <div className="text-blue-400 text-xs">{b.time?.slice(0, 5)}</div>
                 </td>
-                <td style={{ padding: '12px 14px', textAlign: 'center' }}>
-                  <span style={{ fontSize: '18px' }}>{'👤'.repeat(Math.min(b.party_size, 4))}</span>
-                  <div style={{ fontSize: '12px', color: 'var(--gray-600)' }}>{b.party_size} guests</div>
+                <td className="td text-center">
+                  <span className="text-white font-semibold">{b.party_size}</span>
+                  <div className="text-slate-600 text-xs">guests</div>
                 </td>
-                <td style={{ padding: '12px 14px' }}>
-                  <span style={{
-                    background: st.bg, color: st.text,
-                    padding: '3px 10px', borderRadius: '20px',
-                    fontSize: '12px', fontWeight: '600',
-                  }}>{st.label}</span>
+                <td className="td">
+                  <span className={`badge border ${st.cls}`}>{st.label}</span>
                 </td>
-                <td style={{ padding: '12px 14px', color: 'var(--gray-600)', fontSize: '13px', maxWidth: '180px' }}>
-                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', display: 'block', whiteSpace: 'nowrap' }}>
-                    {b.special_requests || '—'}
-                  </span>
+                <td className="td max-w-[160px]">
+                  <span className="block truncate text-slate-500">{b.special_requests || '—'}</span>
                 </td>
-                <td style={{ padding: '12px 14px' }}>
-                  <div style={{ display: 'flex', gap: '6px' }}>
+                <td className="td">
+                  <div className="flex gap-2">
                     {b.status === 'pending' && (
                       <button
                         onClick={() => handleConfirm(b.id)}
                         disabled={updating === b.id}
-                        style={{
-                          padding: '5px 12px', borderRadius: '8px',
-                          background: '#10B981', color: 'white',
-                          fontSize: '12px', fontWeight: '600',
-                          opacity: updating === b.id ? 0.6 : 1,
-                        }}
-                      >Confirm</button>
+                        className="text-xs px-3 py-1 rounded-md bg-green-600/20 text-green-400 border border-green-500/20 hover:bg-green-600/30 transition-colors font-medium"
+                      >
+                        Confirm
+                      </button>
                     )}
                     {b.status !== 'cancelled' && b.status !== 'completed' && (
                       <button
                         onClick={() => handleCancel(b.id)}
                         disabled={updating === b.id}
-                        style={{
-                          padding: '5px 12px', borderRadius: '8px',
-                          background: '#FEE2E2', color: '#B91C1C',
-                          fontSize: '12px', fontWeight: '600',
-                          opacity: updating === b.id ? 0.6 : 1,
-                        }}
-                      >Cancel</button>
+                        className="text-xs px-3 py-1 rounded-md bg-red-600/20 text-red-400 border border-red-500/20 hover:bg-red-600/30 transition-colors font-medium"
+                      >
+                        Cancel
+                      </button>
                     )}
                   </div>
                 </td>

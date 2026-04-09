@@ -1,11 +1,6 @@
 import React, { useState } from 'react'
 import { getMessages } from '../../services/api'
 
-const CHANNEL_ICONS = {
-  web_chat: '💬',
-  whatsapp: '📱',
-}
-
 export default function ConversationsPanel({ conversations, loading }) {
   const [selected, setSelected] = useState(null)
   const [messages, setMessages] = useState([])
@@ -15,104 +10,75 @@ export default function ConversationsPanel({ conversations, loading }) {
     if (selected?.id === conv.id) { setSelected(null); return }
     setSelected(conv)
     setMsgLoading(true)
-    try {
-      const msgs = await getMessages(conv.session_id)
-      setMessages(msgs)
-    } catch {
-      setMessages([])
-    } finally {
-      setMsgLoading(false)
-    }
+    try { setMessages(await getMessages(conv.session_id)) }
+    catch { setMessages([]) }
+    finally { setMsgLoading(false) }
   }
 
-  if (loading) return <div style={{ padding: '40px', textAlign: 'center', color: 'var(--gray-400)' }}>Loading...</div>
-  if (!conversations?.length) return (
-    <div style={{ padding: '40px', textAlign: 'center', color: 'var(--gray-400)' }}>
-      <div style={{ fontSize: '40px', marginBottom: '8px' }}>💬</div>
-      <div>No conversations yet.</div>
-    </div>
-  )
+  if (loading) return <div className="py-10 text-center text-sm text-slate-600">Loading...</div>
+  if (!conversations?.length) return <div className="py-10 text-center text-sm text-slate-600">No conversations yet.</div>
 
   return (
-    <div style={{ display: 'flex', gap: '16px', minHeight: '300px' }}>
+    <div className="flex gap-4 h-[calc(100vh-180px)]">
       {/* List */}
-      <div style={{ width: '320px', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '6px' }}>
+      <div className="w-72 shrink-0 flex flex-col gap-1 overflow-y-auto">
         {conversations.map(conv => (
-          <div
+          <button
             key={conv.id}
             onClick={() => handleSelect(conv)}
-            style={{
-              padding: '12px 16px',
-              borderRadius: 'var(--radius-sm)',
-              background: selected?.id === conv.id ? 'var(--beige)' : 'white',
-              border: `1px solid ${selected?.id === conv.id ? 'var(--beige-dark)' : 'var(--gray-200)'}`,
-              cursor: 'pointer',
-              transition: 'all 0.15s',
-            }}
+            className={`w-full text-left px-4 py-3 rounded-xl border transition-all ${
+              selected?.id === conv.id
+                ? 'bg-blue-600/15 border-blue-500/25 text-white'
+                : 'glass hover:bg-white/[.06] text-slate-400 hover:text-white'
+            }`}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-              <span style={{ fontSize: '16px' }}>{CHANNEL_ICONS[conv.channel] || '💬'}</span>
-              <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--brown)', flex: 1 }}>
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-xs font-semibold capitalize">
                 {conv.channel === 'whatsapp' ? 'WhatsApp' : 'Web Chat'}
               </span>
-              <span style={{ fontSize: '11px', color: 'var(--gray-400)' }}>
+              <span className="text-xs text-slate-600">
                 {new Date(conv.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
               </span>
             </div>
-            <div style={{
-              fontSize: '12.5px', color: 'var(--gray-600)',
-              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-            }}>
+            <div className="text-xs text-slate-500 truncate">
               {conv.last_message || 'No messages'}
             </div>
-          </div>
+          </button>
         ))}
       </div>
 
       {/* Messages */}
-      {selected && (
-        <div style={{
-          flex: 1,
-          background: 'var(--off-white)',
-          borderRadius: 'var(--radius-sm)',
-          border: '1px solid var(--beige-dark)',
-          padding: '16px',
-          overflowY: 'auto',
-          maxHeight: '400px',
-          animation: 'fadeInUp 0.2s ease-out',
-        }}>
-          {msgLoading ? (
-            <div style={{ textAlign: 'center', color: 'var(--gray-400)', paddingTop: '40px' }}>Loading messages...</div>
-          ) : messages.length === 0 ? (
-            <div style={{ textAlign: 'center', color: 'var(--gray-400)', paddingTop: '40px' }}>No messages found.</div>
-          ) : (
-            messages.map(msg => (
-              <div key={msg.id} style={{
-                display: 'flex',
-                justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start',
-                marginBottom: '10px',
-              }}>
-                <div style={{
-                  maxWidth: '70%',
-                  padding: '8px 12px',
-                  borderRadius: msg.role === 'user' ? '12px 12px 2px 12px' : '12px 12px 12px 2px',
-                  background: msg.role === 'user' ? 'var(--blue)' : 'white',
-                  color: msg.role === 'user' ? 'white' : 'var(--gray-800)',
-                  fontSize: '13px',
-                  lineHeight: '1.5',
-                  boxShadow: 'var(--shadow-sm)',
-                  whiteSpace: 'pre-wrap',
-                }}>
+      <div className="flex-1 glass overflow-y-auto p-4">
+        {!selected ? (
+          <div className="h-full flex items-center justify-center text-sm text-slate-600">
+            Select a conversation to view messages
+          </div>
+        ) : msgLoading ? (
+          <div className="h-full flex items-center justify-center text-sm text-slate-600">Loading...</div>
+        ) : messages.length === 0 ? (
+          <div className="h-full flex items-center justify-center text-sm text-slate-600">No messages found.</div>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {messages.map(msg => (
+              <div
+                key={msg.id}
+                className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              >
+                <div className={`max-w-[70%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
+                  msg.role === 'user'
+                    ? 'bg-blue-600/80 text-white rounded-br-sm'
+                    : 'bg-white/[.07] text-slate-300 rounded-bl-sm'
+                }`}>
                   {msg.content}
-                  <div style={{ fontSize: '10px', opacity: 0.6, textAlign: 'right', marginTop: '2px' }}>
+                  <div className="text-xs opacity-50 mt-1 text-right">
                     {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </div>
                 </div>
               </div>
-            ))
-          )}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
 }

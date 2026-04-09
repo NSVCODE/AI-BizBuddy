@@ -1,0 +1,59 @@
+2026/04/09-19:00:05.945 3eec Reusing MANIFEST C:\Users\Eva Nook\Desktop\AI_BizBuddy\whatsapp-service\.wwebjs_auth\session\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
+2026/04/09-19:00:05.946 3eec Recovering log #796
+2026/04/09-19:00:05.971 3eec Reusing old log C:\Users\Eva Nook\Desktop\AI_BizBuddy\whatsapp-service\.wwebjs_auth\session\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/000796.log 
+2026/04/09-19:04:01.708 3eec Level-0 table #822: started
+2026/04/09-19:04:01.760 3eec Level-0 table #822: 1279270 bytes OK
+2026/04/09-19:04:01.769 3eec Delete type=0 #796
+2026/04/09-19:04:02.860 3eec Compacting 1@0 + 0@1 files
+2026/04/09-19:04:02.903 3eec Generated table #823@0: 14031 keys, 306905 bytes
+2026/04/09-19:04:02.930 3eec Generated table #824@0: 2778 keys, 165643 bytes
+2026/04/09-19:04:02.930 3eec Compacted 1@0 + 0@1 files => 472548 bytes
+2026/04/09-19:04:02.937 3eec compacted to: files[ 0 2 29 0 0 0 0 ]
+2026/04/09-19:04:02.938 3eec Delete type=2 #822
+2026/04/09-19:04:04.032 3eec Compacting 1@1 + 9@2 files
+2026/04/09-19:04:04.150 3eec Generated table #825@1: 29051 keys, 2259844 bytes
+2026/04/09-19:04:04.235 3eec Generated table #826@1: 31887 keys, 2240309 bytes
+2026/04/09-19:04:04.307 3eec Generated table #827@1: 14465 keys, 2190377 bytes
+2026/04/09-19:04:04.373 3eec Generated table #828@1: 8780 keys, 2130845 bytes
+2026/04/09-19:04:04.478 3eec Generated table #829@1: 106644 keys, 2259145 bytes
+2026/04/09-19:04:04.595 3eec Generated table #830@1: 98555 keys, 2248237 bytes
+2026/04/09-19:04:04.694 3eec Generated table #831@1: 98210 keys, 2248292 bytes
+2026/04/09-19:04:04.788 3eec Generated table #832@1: 97874 keys, 2248648 bytes
+2026/04/09-19:04:04.815 3eec Generated table #833@1: 5363 keys, 318632 bytes
+2026/04/09-19:04:04.815 3eec Compacted 1@1 + 9@2 files => 18144329 bytes
+2026/04/09-19:04:04.822 3eec compacted to: files[ 0 1 29 0 0 0 0 ]
+2026/04/09-19:04:04.823 3eec Delete type=2 #811
+2026/04/09-19:04:04.823 3eec Delete type=2 #812
+2026/04/09-19:04:04.823 3eec Delete type=2 #813
+2026/04/09-19:04:04.823 3eec Delete type=2 #814
+2026/04/09-19:04:04.824 3eec Delete type=2 #815
+2026/04/09-19:04:04.824 3eec Delete type=2 #816
+2026/04/09-19:04:04.824 3eec Delete type=2 #817
+2026/04/09-19:04:04.824 3eec Delete type=2 #818
+2026/04/09-19:04:04.824 3eec Delete type=2 #819
+2026/04/09-19:04:04.824 3eec Delete type=2 #824
+2026/04/09-19:04:32.693 3eec Compacting 1@1 + 10@2 files
+2026/04/09-19:04:32.785 3eec Generated table #834@1: 48575 keys, 2239085 bytes
+2026/04/09-19:04:32.858 3eec Generated table #835@1: 38660 keys, 2211686 bytes
+2026/04/09-19:04:32.900 3eec Generated table #836@1: 1782 keys, 2146716 bytes
+2026/04/09-19:04:32.953 3eec Generated table #837@1: 2731 keys, 2174258 bytes
+2026/04/09-19:04:33.002 3eec Generated table #838@1: 2503 keys, 2178045 bytes
+2026/04/09-19:04:33.045 3eec Generated table #839@1: 2767 keys, 2149369 bytes
+2026/04/09-19:04:33.096 3eec Generated table #840@1: 2078 keys, 2141540 bytes
+2026/04/09-19:04:33.157 3eec Generated table #841@1: 3062 keys, 2152171 bytes
+2026/04/09-19:04:33.237 3eec Generated table #842@1: 2661 keys, 2150390 bytes
+2026/04/09-19:04:33.351 3eec Generated table #843@1: 31184 keys, 2225636 bytes
+2026/04/09-19:04:33.372 3eec Generated table #844@1: 1215 keys, 93355 bytes
+2026/04/09-19:04:33.372 3eec Compacted 1@1 + 10@2 files => 21862251 bytes
+2026/04/09-19:04:33.380 3eec compacted to: files[ 0 0 30 0 0 0 0 ]
+2026/04/09-19:04:33.381 3eec Delete type=2 #800
+2026/04/09-19:04:33.381 3eec Delete type=2 #801
+2026/04/09-19:04:33.381 3eec Delete type=2 #802
+2026/04/09-19:04:33.381 3eec Delete type=2 #803
+2026/04/09-19:04:33.381 3eec Delete type=2 #804
+2026/04/09-19:04:33.382 3eec Delete type=2 #805
+2026/04/09-19:04:33.382 3eec Delete type=2 #806
+2026/04/09-19:04:33.382 3eec Delete type=2 #807
+2026/04/09-19:04:33.382 3eec Delete type=2 #808
+2026/04/09-19:04:33.382 3eec Delete type=2 #809
+2026/04/09-19:04:33.382 3eec Delete type=2 #823

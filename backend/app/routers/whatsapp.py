@@ -59,6 +59,17 @@ async def handle_missed_call(req: MissedCallRequest):
     }
 
 
+@router.post("/incoming")
+async def incoming_whatsapp_message(msg: WhatsAppMessage):
+    """
+    Receives a real incoming WhatsApp message from the whatsapp-service Node.js bridge.
+    Processes it with Claude and returns the reply.
+    """
+    session_id = msg.session_id or _get_session(msg.phone)
+    reply = process_message(session_id, msg.message, channel="whatsapp")
+    return ChatResponse(session_id=session_id, reply=reply, channel="whatsapp")
+
+
 @router.get("/sessions")
 async def list_wa_sessions():
     """List active WhatsApp simulation sessions."""

@@ -3,19 +3,12 @@ import { Link } from 'react-router-dom'
 import ChatWidget from '../components/ChatWidget'
 
 const MENU_ITEMS = [
-  { name: 'Signature LatteLune Latte', price: '₹220', tag: 'Fan Favourite', emoji: '☕' },
-  { name: 'Iced Matcha Latte', price: '₹250', tag: 'Bestseller', emoji: '🍵' },
-  { name: 'Blue Butterfly Lemonade', price: '₹220', tag: 'Aesthetic', emoji: '💙' },
-  { name: 'Waffle Stack', price: '₹320', tag: 'Must Try', emoji: '🧇' },
-  { name: 'Avocado Toast', price: '₹280', tag: 'Healthy', emoji: '🥑' },
-  { name: 'Lotus Biscoff Cheesecake', price: '₹260', tag: 'Dreamy', emoji: '🍰' },
-]
-
-const GALLERY = [
-  { emoji: '☕', label: 'Artisan Coffee', bg: '#A8C8E8' },
-  { emoji: '🧇', label: 'Waffle Stacks', bg: '#F9C74F' },
-  { emoji: '🍰', label: 'Dreamy Cakes', bg: '#F5E6D3' },
-  { emoji: '💙', label: 'Aesthetic Drinks', bg: '#5B8DB8' },
+  { name: 'Signature LatteLune Latte', price: '220', tag: 'Fan Favourite' },
+  { name: 'Iced Matcha Latte', price: '250', tag: 'Bestseller' },
+  { name: 'Blue Butterfly Lemonade', price: '220', tag: 'Aesthetic' },
+  { name: 'Waffle Stack', price: '320', tag: 'Must Try' },
+  { name: 'Avocado Toast', price: '280', tag: 'Healthy' },
+  { name: 'Lotus Biscoff Cheesecake', price: '260', tag: 'Dreamy' },
 ]
 
 export default function Home() {
@@ -27,20 +20,18 @@ export default function Home() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--off-white)' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--white)' }}>
       {/* Nav */}
       <nav style={{
         position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000,
-        background: 'rgba(253,250,246,0.92)',
-        backdropFilter: 'blur(12px)',
-        borderBottom: '1px solid var(--beige-dark)',
-        padding: '0 40px',
-        display: 'flex', alignItems: 'center', height: '68px',
+        background: 'var(--white)',
+        borderBottom: '1px solid var(--border)',
+        padding: '0 48px',
+        display: 'flex', alignItems: 'center', height: '64px',
         boxShadow: 'var(--shadow-sm)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <span style={{ fontSize: '28px' }}>☕</span>
-          <span style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: 'var(--brown)', fontWeight: '700' }}>
+          <span style={{ fontFamily: 'var(--font-display)', fontSize: '20px', color: 'var(--navy)', fontWeight: '700', letterSpacing: '-0.5px' }}>
             LatteLune
           </span>
         </div>
@@ -48,12 +39,11 @@ export default function Home() {
         <div style={{ marginLeft: '48px', display: 'flex', gap: '4px' }}>
           {[['home', 'Home'], ['menu', 'Menu'], ['about', 'About'], ['contact', 'Contact']].map(([id, label]) => (
             <button key={id} onClick={() => scrollTo(id)} style={{
-              padding: '7px 16px', borderRadius: '8px',
+              padding: '7px 16px', borderRadius: '6px',
               background: 'transparent',
-              color: activeNav === id ? 'var(--blue)' : 'var(--gray-600)',
+              color: activeNav === id ? 'var(--navy)' : 'var(--text-secondary)',
               fontSize: '14px', fontWeight: activeNav === id ? '600' : '400',
-              cursor: 'pointer', transition: 'all 0.2s',
-              borderBottom: activeNav === id ? '2px solid var(--blue)' : '2px solid transparent',
+              cursor: 'pointer', transition: 'color 0.2s',
             }}>{label}</button>
           ))}
         </div>
@@ -62,276 +52,256 @@ export default function Home() {
           <button
             onClick={() => scrollTo('menu')}
             style={{
-              padding: '8px 20px', borderRadius: '20px',
-              background: 'var(--yellow)', color: 'var(--brown)',
+              padding: '8px 20px', borderRadius: '8px',
+              background: 'var(--navy)', color: 'white',
               fontSize: '14px', fontWeight: '600', cursor: 'pointer',
-              border: '2px solid var(--yellow-dark)',
-              transition: 'all 0.2s',
+              transition: 'background 0.2s',
             }}
-            onMouseOver={e => e.currentTarget.style.background = 'var(--yellow-dark)'}
-            onMouseOut={e => e.currentTarget.style.background = 'var(--yellow)'}
+            onMouseOver={e => e.currentTarget.style.background = 'var(--navy-light)'}
+            onMouseOut={e => e.currentTarget.style.background = 'var(--navy)'}
           >
-            Order Now
+            Reserve a Table
           </button>
           <Link to="/dashboard" style={{
-            padding: '8px 16px', borderRadius: '20px',
-            background: 'transparent', color: 'var(--gray-600)',
-            fontSize: '13px', border: '1px solid var(--gray-200)',
-            textDecoration: 'none',
-          }}>Admin →</Link>
+            padding: '8px 16px', borderRadius: '8px',
+            color: 'var(--text-secondary)',
+            fontSize: '13px', border: '1px solid var(--border)',
+          }}>Admin</Link>
         </div>
       </nav>
 
       {/* Hero */}
       <section id="home" style={{
         minHeight: '100vh',
-        background: 'linear-gradient(160deg, var(--beige) 0%, var(--off-white) 50%, #EBF4FB 100%)',
+        background: 'var(--white)',
         display: 'flex',
         alignItems: 'center',
-        padding: '100px 40px 60px',
-        position: 'relative',
-        overflow: 'hidden',
+        padding: '100px 48px 60px',
       }}>
-        {/* Decorative circles */}
-        {[
-          { size: 400, top: '-100px', right: '-80px', color: 'rgba(91,141,184,0.08)' },
-          { size: 250, bottom: '40px', left: '10%', color: 'rgba(249,199,79,0.12)' },
-          { size: 150, top: '30%', right: '30%', color: 'rgba(107,66,38,0.05)' },
-        ].map((c, i) => (
-          <div key={i} style={{
-            position: 'absolute', width: c.size, height: c.size, borderRadius: '50%',
-            background: c.color, top: c.top, bottom: c.bottom, left: c.left, right: c.right,
-            pointerEvents: 'none',
-          }} />
-        ))}
-
-        <div style={{ maxWidth: '640px', position: 'relative', zIndex: 1 }}>
-          <div style={{
-            display: 'inline-flex', alignItems: 'center', gap: '8px',
-            background: 'var(--yellow)', color: 'var(--brown)',
-            padding: '6px 16px', borderRadius: '20px',
-            fontSize: '13px', fontWeight: '600', marginBottom: '24px',
-            border: '1.5px solid var(--yellow-dark)',
-          }}>
-            <span>✨</span> Now open in Indiranagar, Bengaluru
-          </div>
-
-          <h1 style={{
-            fontSize: '58px', lineHeight: '1.15',
-            color: 'var(--brown)', marginBottom: '20px',
-            fontFamily: 'var(--font-display)',
-          }}>
-            Where every sip<br />
-            <span style={{ color: 'var(--blue)' }}>feels like moonlight</span>
-          </h1>
-
-          <p style={{
-            fontSize: '18px', color: 'var(--gray-600)', lineHeight: '1.7',
-            marginBottom: '36px', maxWidth: '480px',
-          }}>
-            A cozy aesthetic café in the heart of Bengaluru.
-            Artisan coffee, dreamy interiors, and baked goods that'll make your day ☁️
-          </p>
-
-          <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-            <button
-              onClick={() => {
-                // trigger chat widget
-                document.querySelector('[aria-label="Open chat"]')?.click()
-              }}
-              style={{
-                padding: '14px 32px', borderRadius: '28px',
-                background: 'linear-gradient(135deg, var(--blue) 0%, var(--blue-dark) 100%)',
-                color: 'white', fontSize: '16px', fontWeight: '600',
-                boxShadow: '0 4px 20px rgba(91,141,184,0.35)',
-                cursor: 'pointer', transition: 'transform 0.2s, box-shadow 0.2s',
-                border: 'none',
-              }}
-              onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 28px rgba(91,141,184,0.45)' }}
-              onMouseOut={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(91,141,184,0.35)' }}
-            >
-              ☕ Reserve a Table
-            </button>
-            <button
-              onClick={() => scrollTo('menu')}
-              style={{
-                padding: '14px 32px', borderRadius: '28px',
-                background: 'white', color: 'var(--brown)',
-                fontSize: '16px', fontWeight: '600',
-                border: '2px solid var(--beige-dark)',
-                cursor: 'pointer',
-                transition: 'all 0.2s',
-              }}
-              onMouseOver={e => e.currentTarget.style.borderColor = 'var(--brown)'}
-              onMouseOut={e => e.currentTarget.style.borderColor = 'var(--beige-dark)'}
-            >
-              View Menu
-            </button>
-          </div>
-
-          {/* Hours badge */}
-          <div style={{
-            marginTop: '40px', display: 'inline-flex', alignItems: 'center', gap: '8px',
-            color: 'var(--gray-600)', fontSize: '14px',
-          }}>
-            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10B981', display: 'inline-block' }} />
-            Open today · 8:00 AM – 10:00 PM
-            <span style={{ margin: '0 6px', color: 'var(--gray-200)' }}>|</span>
-            📍 Indiranagar, Bengaluru
-          </div>
-        </div>
-
-        {/* Hero visual */}
-        <div style={{
-          position: 'absolute', right: '5%', top: '50%',
-          transform: 'translateY(-50%)',
-          display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px',
-        }}>
-          {GALLERY.map((g, i) => (
-            <div key={i} style={{
-              width: '160px', height: '160px',
-              borderRadius: '20px',
-              background: g.bg,
-              display: 'flex', flexDirection: 'column',
-              alignItems: 'center', justifyContent: 'center',
-              gap: '8px',
-              transform: i % 2 === 0 ? 'translateY(0)' : 'translateY(20px)',
-              boxShadow: 'var(--shadow-md)',
-              animation: `fadeInUp 0.5s ease-out ${i * 0.1}s both`,
+        <div style={{ maxWidth: '1100px', margin: '0 auto', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '60px' }}>
+          <div style={{ maxWidth: '560px' }}>
+            <div style={{
+              display: 'inline-block',
+              background: 'var(--subtle)',
+              color: 'var(--navy)',
+              padding: '5px 14px', borderRadius: '6px',
+              fontSize: '12px', fontWeight: '600', marginBottom: '24px',
+              letterSpacing: '0.05em', textTransform: 'uppercase',
+              border: '1px solid var(--border)',
             }}>
-              <span style={{ fontSize: '48px' }}>{g.emoji}</span>
-              <span style={{ fontSize: '12px', fontWeight: '600', color: 'white', textShadow: '0 1px 3px rgba(0,0,0,0.2)' }}>{g.label}</span>
+              Now open in Indiranagar, Bengaluru
             </div>
-          ))}
+
+            <h1 style={{
+              fontSize: '54px', lineHeight: '1.1',
+              color: 'var(--navy)', marginBottom: '20px',
+              fontWeight: '700', letterSpacing: '-1px',
+            }}>
+              Where every sip<br />
+              <span style={{ color: 'var(--navy-muted)' }}>feels like moonlight</span>
+            </h1>
+
+            <p style={{
+              fontSize: '17px', color: 'var(--text-secondary)', lineHeight: '1.7',
+              marginBottom: '36px', maxWidth: '460px',
+            }}>
+              A cozy aesthetic café in the heart of Bengaluru.
+              Artisan coffee, dreamy interiors, and baked goods made fresh daily.
+            </p>
+
+            <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap' }}>
+              <button
+                onClick={() => document.querySelector('[aria-label="Open chat"]')?.click()}
+                style={{
+                  padding: '13px 30px', borderRadius: '8px',
+                  background: 'var(--navy)',
+                  color: 'white', fontSize: '15px', fontWeight: '600',
+                  cursor: 'pointer', transition: 'background 0.2s',
+                  border: 'none',
+                }}
+                onMouseOver={e => e.currentTarget.style.background = 'var(--navy-light)'}
+                onMouseOut={e => e.currentTarget.style.background = 'var(--navy)'}
+              >
+                Reserve a Table
+              </button>
+              <button
+                onClick={() => scrollTo('menu')}
+                style={{
+                  padding: '13px 30px', borderRadius: '8px',
+                  background: 'white', color: 'var(--navy)',
+                  fontSize: '15px', fontWeight: '600',
+                  border: '1.5px solid var(--border)',
+                  cursor: 'pointer',
+                }}
+              >
+                View Menu
+              </button>
+            </div>
+
+            <div style={{
+              marginTop: '40px', display: 'inline-flex', alignItems: 'center', gap: '8px',
+              color: 'var(--text-secondary)', fontSize: '13px',
+            }}>
+              <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: 'var(--success)' }} />
+              Open today · 8:00 AM – 10:00 PM · Indiranagar, Bengaluru
+            </div>
+          </div>
+
+          {/* Right — stat cards */}
+          <div style={{
+            display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px',
+            flexShrink: 0,
+          }}>
+            {[
+              { label: 'Artisan Coffee', sub: 'Hand-crafted daily' },
+              { label: 'Fresh Bakes', sub: 'From scratch every morning' },
+              { label: 'Cozy Interiors', sub: 'Work or unwind' },
+              { label: 'Aesthetic Drinks', sub: 'Instagram-worthy' },
+            ].map((card, i) => (
+              <div key={i} style={{
+                width: '160px', height: '140px',
+                borderRadius: '12px',
+                background: i % 2 === 0 ? 'var(--navy)' : 'var(--subtle)',
+                display: 'flex', flexDirection: 'column',
+                alignItems: 'flex-start', justifyContent: 'flex-end',
+                padding: '18px',
+                transform: i % 2 === 0 ? 'translateY(0)' : 'translateY(16px)',
+                boxShadow: 'var(--shadow-md)',
+              }}>
+                <div style={{ fontWeight: '700', fontSize: '13px', color: i % 2 === 0 ? 'white' : 'var(--navy)', marginBottom: '4px' }}>{card.label}</div>
+                <div style={{ fontSize: '11px', color: i % 2 === 0 ? 'rgba(255,255,255,0.6)' : 'var(--text-secondary)', lineHeight: 1.3 }}>{card.sub}</div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* Features Strip */}
       <section style={{
-        background: 'var(--blue-dark)', color: 'white',
-        padding: '20px 40px',
+        background: 'var(--navy)', color: 'white',
+        padding: '18px 48px',
         display: 'flex', justifyContent: 'center', gap: '48px',
         flexWrap: 'wrap',
       }}>
-        {[
-          ['🌐', 'Free WiFi'],
-          ['🐾', 'Pet Friendly'],
-          ['🎵', 'Live Music Weekends'],
-          ['🎂', 'Private Events'],
-          ['🏷️', 'LunaStars Loyalty'],
-        ].map(([icon, label]) => (
-          <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: '500' }}>
-            <span style={{ fontSize: '18px' }}>{icon}</span> {label}
+        {['Free WiFi', 'Pet Friendly', 'Live Music Weekends', 'Private Events', 'LunaStars Loyalty'].map(label => (
+          <div key={label} style={{ fontSize: '13px', fontWeight: '500', opacity: 0.85 }}>
+            {label}
           </div>
         ))}
       </section>
 
       {/* Menu Section */}
-      <section id="menu" style={{ padding: '80px 40px', maxWidth: '1100px', margin: '0 auto' }}>
-        <div style={{ textAlign: 'center', marginBottom: '48px' }}>
-          <div style={{ fontSize: '13px', fontWeight: '600', color: 'var(--blue)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '8px' }}>
+      <section id="menu" style={{ padding: '88px 48px', maxWidth: '1100px', margin: '0 auto' }}>
+        <div style={{ marginBottom: '48px' }}>
+          <div style={{ fontSize: '12px', fontWeight: '600', color: 'var(--navy-muted)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '10px' }}>
             Our Menu
           </div>
-          <h2 style={{ fontSize: '40px', color: 'var(--brown)' }}>Crafted with love ☕</h2>
-          <p style={{ color: 'var(--gray-600)', marginTop: '12px', fontSize: '16px' }}>
+          <h2 style={{ fontSize: '38px', color: 'var(--navy)', fontWeight: '700', letterSpacing: '-0.5px' }}>Crafted with care</h2>
+          <p style={{ color: 'var(--text-secondary)', marginTop: '10px', fontSize: '16px' }}>
             Every item is made fresh daily — no compromises, no shortcuts.
           </p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
           {MENU_ITEMS.map((item) => (
             <div key={item.name} style={{
-              background: 'white',
+              background: 'var(--white)',
               borderRadius: 'var(--radius-md)',
               padding: '24px',
               boxShadow: 'var(--shadow-sm)',
-              border: '1px solid var(--beige)',
-              transition: 'all 0.25s',
+              border: '1px solid var(--border)',
+              transition: 'all 0.2s',
               cursor: 'default',
             }}
-            onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = 'var(--shadow-md)' }}
-            onMouseOut={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'var(--shadow-sm)' }}
+            onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = 'var(--shadow-md)'; e.currentTarget.style.borderColor = 'var(--navy)' }}
+            onMouseOut={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'var(--shadow-sm)'; e.currentTarget.style.borderColor = 'var(--border)' }}
             >
-              <div style={{ fontSize: '40px', marginBottom: '12px' }}>{item.emoji}</div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
-                <div style={{ fontSize: '16px', fontWeight: '600', color: 'var(--brown)', fontFamily: 'var(--font-display)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px', marginBottom: '12px' }}>
+                <div style={{ fontSize: '15px', fontWeight: '600', color: 'var(--navy)' }}>
                   {item.name}
                 </div>
-                <div style={{ fontSize: '16px', fontWeight: '700', color: 'var(--blue)', flexShrink: 0 }}>
-                  {item.price}
+                <div style={{ fontSize: '15px', fontWeight: '700', color: 'var(--navy)', flexShrink: 0 }}>
+                  ₹{item.price}
                 </div>
               </div>
               <span style={{
-                display: 'inline-block', marginTop: '10px',
+                display: 'inline-block',
                 padding: '3px 10px', borderRadius: '20px',
-                background: 'var(--beige)', color: 'var(--brown)',
-                fontSize: '11px', fontWeight: '600',
+                background: 'var(--subtle)', color: 'var(--navy-muted)',
+                fontSize: '11px', fontWeight: '600', border: '1px solid var(--border)',
               }}>{item.tag}</span>
             </div>
           ))}
         </div>
 
-        <div style={{ textAlign: 'center', marginTop: '36px' }}>
+        <div style={{ marginTop: '36px' }}>
           <button
             onClick={() => document.querySelector('[aria-label="Open chat"]')?.click()}
             style={{
-              padding: '12px 28px', borderRadius: '24px',
-              background: 'var(--beige)', color: 'var(--brown)',
-              fontSize: '15px', fontWeight: '600', cursor: 'pointer',
-              border: '2px solid var(--beige-dark)',
+              padding: '11px 26px', borderRadius: '8px',
+              background: 'var(--subtle)', color: 'var(--navy)',
+              fontSize: '14px', fontWeight: '600', cursor: 'pointer',
+              border: '1px solid var(--border)',
             }}
           >
-            ☕ Ask Luna about the full menu
+            Ask Luna about the full menu
           </button>
         </div>
       </section>
 
       {/* About Section */}
       <section id="about" style={{
-        background: 'linear-gradient(135deg, var(--brown) 0%, #8B5E3C 100%)',
-        padding: '80px 40px', color: 'white', textAlign: 'center',
+        background: 'var(--navy)',
+        padding: '88px 48px', color: 'white',
       }}>
-        <h2 style={{ fontSize: '40px', color: 'white', marginBottom: '16px' }}>
-          Our Story 🌙
-        </h2>
-        <p style={{ fontSize: '17px', lineHeight: '1.8', maxWidth: '600px', margin: '0 auto 32px', opacity: 0.9 }}>
-          LatteLune was born from a simple dream — to create a space where people could slow down,
-          sip something beautiful, and feel at home. Every corner of our café tells a story,
-          and every cup is poured with intention.
-        </p>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '48px', flexWrap: 'wrap', marginTop: '40px' }}>
-          {[['500+', 'Happy regulars'], ['3', 'Signature blends'], ['8am', 'Open daily'], ['🏆', 'Best café award 2024']].map(([num, label]) => (
-            <div key={label} style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '36px', fontFamily: 'var(--font-display)', fontWeight: '700', color: 'var(--yellow)' }}>{num}</div>
-              <div style={{ fontSize: '13px', opacity: 0.8, marginTop: '4px' }}>{label}</div>
-            </div>
-          ))}
+        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+          <div style={{ fontSize: '12px', fontWeight: '600', color: 'rgba(255,255,255,0.5)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '10px' }}>
+            Our Story
+          </div>
+          <h2 style={{ fontSize: '38px', color: 'white', marginBottom: '20px', fontWeight: '700', letterSpacing: '-0.5px', maxWidth: '500px' }}>
+            A space to slow down and savour
+          </h2>
+          <p style={{ fontSize: '16px', lineHeight: '1.8', maxWidth: '560px', opacity: 0.75, marginBottom: '56px' }}>
+            LatteLune was born from a simple dream — to create a space where people could slow down,
+            sip something beautiful, and feel at home. Every corner tells a story,
+            and every cup is poured with intention.
+          </p>
+          <div style={{ display: 'flex', gap: '56px', flexWrap: 'wrap' }}>
+            {[['500+', 'Happy regulars'], ['3', 'Signature blends'], ['8am', 'Open daily'], ['2024', 'Best café award']].map(([num, label]) => (
+              <div key={label}>
+                <div style={{ fontSize: '34px', fontWeight: '700', color: 'white', letterSpacing: '-1px' }}>{num}</div>
+                <div style={{ fontSize: '13px', opacity: 0.55, marginTop: '4px' }}>{label}</div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* Contact Section */}
-      <section id="contact" style={{ padding: '80px 40px', maxWidth: '800px', margin: '0 auto', textAlign: 'center' }}>
-        <h2 style={{ fontSize: '40px', color: 'var(--brown)', marginBottom: '16px' }}>
-          Find Us ☕
-        </h2>
-        <p style={{ color: 'var(--gray-600)', marginBottom: '40px', fontSize: '16px' }}>
-          Come say hello, or chat with Luna to book a table!
-        </p>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '24px', flexWrap: 'wrap' }}>
+      <section id="contact" style={{ padding: '88px 48px', maxWidth: '1100px', margin: '0 auto' }}>
+        <div style={{ marginBottom: '48px' }}>
+          <div style={{ fontSize: '12px', fontWeight: '600', color: 'var(--navy-muted)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '10px' }}>
+            Find Us
+          </div>
+          <h2 style={{ fontSize: '38px', color: 'var(--navy)', fontWeight: '700', letterSpacing: '-0.5px' }}>Come say hello</h2>
+          <p style={{ color: 'var(--text-secondary)', marginTop: '10px', fontSize: '16px' }}>
+            Or chat with Luna to book a table instantly.
+          </p>
+        </div>
+        <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
           {[
-            { icon: '📍', title: 'Address', detail: '12th Main Rd, Indiranagar\nBengaluru 560008' },
-            { icon: '⏰', title: 'Hours', detail: 'Mon–Fri: 8am–10pm\nSat–Sun: 9am–11pm' },
-            { icon: '📞', title: 'Phone', detail: '+91 98765 43210' },
-            { icon: '📧', title: 'Email', detail: 'hello@lattelune.in' },
+            { title: 'Address', detail: '12th Main Rd, Indiranagar\nBengaluru 560008' },
+            { title: 'Hours', detail: 'Mon–Fri: 8am–10pm\nSat–Sun: 9am–11pm' },
+            { title: 'Phone', detail: '+91 98765 43210' },
+            { title: 'Email', detail: 'hello@lattelune.in' },
           ].map(card => (
             <div key={card.title} style={{
-              background: 'white', borderRadius: 'var(--radius-md)',
-              padding: '28px 32px', minWidth: '180px',
-              boxShadow: 'var(--shadow-sm)', border: '1px solid var(--beige)',
+              background: 'var(--white)', borderRadius: 'var(--radius-md)',
+              padding: '28px 32px', minWidth: '200px',
+              boxShadow: 'var(--shadow-sm)', border: '1px solid var(--border)',
             }}>
-              <div style={{ fontSize: '32px', marginBottom: '10px' }}>{card.icon}</div>
-              <div style={{ fontWeight: '700', color: 'var(--brown)', marginBottom: '6px', fontSize: '15px' }}>{card.title}</div>
-              <div style={{ fontSize: '13px', color: 'var(--gray-600)', whiteSpace: 'pre-line', lineHeight: '1.6' }}>{card.detail}</div>
+              <div style={{ fontWeight: '700', color: 'var(--navy)', marginBottom: '8px', fontSize: '14px', textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: '11px' }}>{card.title}</div>
+              <div style={{ fontSize: '14px', color: 'var(--text-secondary)', whiteSpace: 'pre-line', lineHeight: '1.6' }}>{card.detail}</div>
             </div>
           ))}
         </div>
@@ -339,18 +309,23 @@ export default function Home() {
 
       {/* Footer */}
       <footer style={{
-        background: 'var(--brown)', color: 'rgba(255,255,255,0.7)',
-        padding: '28px 40px', textAlign: 'center', fontSize: '13px',
+        background: 'var(--navy)', color: 'rgba(255,255,255,0.5)',
+        padding: '28px 48px',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        fontSize: '13px', flexWrap: 'wrap', gap: '12px',
       }}>
-        <div style={{ marginBottom: '8px' }}>
-          <span style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'white' }}>LatteLune ☕🌙</span>
+        <div>
+          <span style={{ color: 'white', fontWeight: '600', fontSize: '15px' }}>LatteLune</span>
+          <span style={{ marginLeft: '16px' }}>© 2025 · Bengaluru</span>
         </div>
-        © 2025 LatteLune. Made with love in Bengaluru.
-        <span style={{ margin: '0 12px', opacity: 0.4 }}>|</span>
-        <Link to="/dashboard" style={{ color: 'rgba(255,255,255,0.5)', textDecoration: 'none' }}>Admin Dashboard</Link>
+        <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
+          <Link to="/dashboard" style={{ color: 'rgba(255,255,255,0.4)' }}>Admin</Link>
+          <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: '11px' }}>
+            Powered by <span style={{ color: 'rgba(255,255,255,0.5)', fontWeight: '600' }}>BizBuddy</span>
+          </span>
+        </div>
       </footer>
 
-      {/* Chat Widget */}
       <ChatWidget />
     </div>
   )
