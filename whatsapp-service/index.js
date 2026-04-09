@@ -107,22 +107,6 @@ client.on('message', async (message) => {
   // Ignore group messages and status updates
   if (message.isGroupMsg || message.from === 'status@broadcast') return
 
-  // Detect missed/rejected calls via call_log system message
-  if (message.type === 'call_log') {
-    const phone = message.from.replace('@c.us', '')
-    console.log(`[BizBuddy] Missed call detected from +${phone} — sending auto-reply`)
-    try {
-      await client.sendMessage(
-        message.from,
-        "Sorry we couldn't attend your call, I'm happy to help you over text! Please let me know how I may assist you"
-      )
-      console.log(`[BizBuddy] Missed call auto-reply sent to +${phone}`)
-    } catch (err) {
-      console.error('[BizBuddy] Missed call auto-reply error:', err.message)
-    }
-    return
-  }
-
   const phone = message.from.replace('@c.us', '')
   const sessionId = `wa_${phone.replace(/\D/g, '')}`
 
@@ -168,6 +152,44 @@ client.on('message', async (message) => {
   } catch (err) {
     console.error('[BizBuddy] Error processing message:', err.message)
   }
+})
+
+// ── Missed call polling ───────────────────────────────────────────────────────
+// whatsapp-web.js call events are unreliable; poll chat history instead
+
+const repliedCallIds = new Set()
+
+async function pollMissedCalls() {
+  if (status !== 'connected') return
+  try {
+    const chats = await client.getChats()
+    for (const chat of chats) {
+      if (chat.isGroup) continue
+      const messages = await chat.fetchMessages({ limit: 5 })
+      for (const msg of messages) {
+        if (msg.fromMe) continue
+        if (repliedCallIds.has(msg.id._serialized)) continue
+        const ageMs = Date.now() - msg.timestamp * 1000
+        if (ageMs > 3 * 60 * 1000) continue // only calls from last 3 minutes
+        // Log all types so we can confirm the call_log type name
+        if (msg.type !== 'chat') {
+          console.log(`[BizBuddy] Non-chat message type found: "${msg.type}" from ${msg.from}`)
+        }
+        if (msg.type === 'call_log') {
+          repliedCallIds.add(msg.id._serialized)
+          await client.sendMessage(
+            msg.from,
+            "Sorry we couldn't attend your call, I'm happy to help you over text! Please let me know how I may assist you"
+          )
+          console.log(`[BizBuddy] Missed call auto-reply sent to ${msg.from}`)
+        }
+      }
+    }
+  } catch (_) {}
+}
+
+client.on('ready', () => {
+  setInterval(pollMissedCalls, 30_000)
 })
 
 client.initialize()
