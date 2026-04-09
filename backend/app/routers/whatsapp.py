@@ -6,7 +6,7 @@ Simulates incoming WhatsApp messages and missed call auto-follow-ups.
 import uuid
 from fastapi import APIRouter
 from app.models.schemas import WhatsAppMessage, MissedCallRequest, ChatResponse
-from app.services.ai_service import process_message
+from app.services.ai_service import process_message, _get_active_business
 from app.services.lead_service import get_or_create_lead_for_missed_call
 from app.db.supabase_client import get_supabase
 
@@ -92,11 +92,13 @@ async def handle_missed_call(req: MissedCallRequest):
     # Generate automated follow-up message via AI
     session_id = _get_session(req.phone)
     greeting_name = req.caller_name or "there"
+    biz = _get_active_business()
+    biz_name = biz.get("name", "us") if biz else "us"
     trigger_message = (
-        f"[SYSTEM: This customer just called LatteLune but the call was missed. "
+        f"[SYSTEM: This customer just called {biz_name} but the call was missed. "
         f"Their name is {greeting_name}. Send them a warm, friendly WhatsApp follow-up message "
         f"acknowledging the missed call, apologising briefly, and offering to help them with "
-        f"anything — like a reservation, menu info, or any question they have. Keep it short and friendly.]"
+        f"anything. Keep it short and friendly.]"
     )
     reply = process_message(session_id, trigger_message, channel="whatsapp")
 
@@ -114,8 +116,14 @@ async def incoming_whatsapp_message(msg: WhatsAppMessage):
     Receives a real incoming WhatsApp message from the whatsapp-service Node.js bridge.
     Processes it with Claude and returns the reply.
     """
+    is_new_session = msg.phone not in _wa_sessions
     session_id = msg.session_id or _get_session(msg.phone)
-    reply = process_message(session_id, msg.message, channel="whatsapp")
+    message = msg.message
+    if is_new_session:
+        ctx = _get_returning_customer_context(msg.phone)
+        if ctx:
+            message = f"{ctx}\n\n{msg.message}"
+    reply = process_message(session_id, message, channel="whatsapp")
     return ChatResponse(session_id=session_id, reply=reply, channel="whatsapp")
 
 

@@ -6,6 +6,26 @@
 -- Enable UUID extension
 create extension if not exists "pgcrypto";
 
+-- ── Businesses ───────────────────────────────────────────────
+create table if not exists businesses (
+  id          uuid primary key default gen_random_uuid(),
+  user_id     uuid references auth.users(id) on delete cascade,
+  name        text not null,
+  type        text not null default 'other',
+  location    text,
+  phone       text,
+  email       text,
+  description text,
+  created_at  timestamptz default now()
+);
+
+alter table businesses enable row level security;
+-- Authenticated users can save their own business
+create policy "Users can insert own business"  on businesses for insert with check (auth.uid() = user_id);
+create policy "Users can update own business"  on businesses for update using (auth.uid() = user_id);
+-- Public read required for customer page and AI prompt (no auth token on those requests)
+create policy "Public can read businesses"     on businesses for select using (true);
+
 -- ── Conversations ────────────────────────────────────────────
 create table if not exists conversations (
   id          uuid primary key default gen_random_uuid(),

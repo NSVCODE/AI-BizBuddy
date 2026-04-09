@@ -54,15 +54,22 @@ client.on('disconnected', (reason) => {
 })
 
 client.on('call', async (call) => {
-  console.log(`[BizBuddy] Incoming call from ${call.from} — rejecting and sending auto-reply`)
+  const from = call.from
+  console.log(`[BizBuddy] Incoming call from ${from} — rejecting and sending auto-reply`)
+
+  // Reject and reply independently — reject can fail without blocking the message
+  try { await call.reject() } catch (e) {
+    console.warn('[BizBuddy] call.reject() failed (non-fatal):', e.message)
+  }
+
   try {
-    await call.reject()
     await client.sendMessage(
-      call.from,
-      "Sorry we couldn't attend your call! We're happy to help via text! How may I assist you today?"
+      from,
+      "Sorry we couldn't attend your call! We're happy to help via text — how can I assist you today? 😊"
     )
+    console.log(`[BizBuddy] Call auto-reply sent to ${from}`)
   } catch (err) {
-    console.error('[BizBuddy] Call handler error:', err.message)
+    console.error('[BizBuddy] Call auto-reply send error:', err.message)
   }
 })
 

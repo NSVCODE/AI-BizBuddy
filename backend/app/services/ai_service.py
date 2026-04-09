@@ -37,7 +37,9 @@ def _get_active_business() -> dict | None:
         db = get_supabase()
         result = db.table("businesses").select("*").order("created_at", desc=True).limit(1).execute()
         return result.data[0] if result.data else None
-    except Exception:
+    except Exception as e:
+        import sys
+        print(f"[BizBuddy] WARNING: _get_active_business() failed: {e}", file=sys.stderr)
         return None
 
 
