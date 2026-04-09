@@ -106,6 +106,8 @@ def build_system_prompt() -> str:
     faq_text = "\n".join(f"  Q: {f['question']}\n  A: {f['answer']}" for f in faq_list)
 
     return f"""
+CRITICAL IDENTITY: You are the AI assistant for **{biz_name}** ONLY. Never mention LatteLune, never mention any other business. If any previous conversation references another business, ignore it — your business is {biz_name}.
+
 {persona_text}
 
 ## About {biz_name}
@@ -134,7 +136,7 @@ def build_system_prompt() -> str:
 TOOLS = [
     {
         "name": "check_availability",
-        "description": "Check if a table is available at LatteLune for a given date, time, and party size.",
+        "description": "Check if an appointment or table is available for a given date, time, and party size.",
         "input_schema": {
             "type": "object",
             "properties": {
@@ -147,7 +149,7 @@ TOOLS = [
     },
     {
         "name": "create_booking",
-        "description": "Create a confirmed table booking at LatteLune. Call this after confirming availability and collecting all required details.",
+        "description": "Create a confirmed booking or appointment. Call this after confirming availability and collecting all required details.",
         "input_schema": {
             "type": "object",
             "properties": {
@@ -178,7 +180,7 @@ TOOLS = [
     },
     {
         "name": "get_available_slots",
-        "description": "Get all available time slots for a specific date at LatteLune.",
+        "description": "Get all available time slots for a specific date.",
         "input_schema": {
             "type": "object",
             "properties": {
@@ -189,7 +191,7 @@ TOOLS = [
     },
     {
         "name": "get_menu",
-        "description": "Get the LatteLune menu, optionally filtered by category.",
+        "description": "Get the menu or service catalog, optionally filtered by category.",
         "input_schema": {
             "type": "object",
             "properties": {
@@ -342,7 +344,7 @@ def process_message(session_id: str, user_message: str, channel: str = "web_chat
         messages.append({"role": "assistant", "content": assistant_content})
 
         if response.stop_reason == "end_turn" or not tool_use_blocks:
-            final_reply = " ".join(text_parts) if text_parts else "I'm here to help! Is there anything else you'd like to know about LatteLune?"
+            final_reply = " ".join(text_parts) if text_parts else "I'm here to help! Feel free to ask me anything."
             # Save assistant message
             new_messages.append({"role": "assistant", "content": final_reply})
             break
