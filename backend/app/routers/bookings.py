@@ -7,9 +7,12 @@ router = APIRouter(prefix="/api/bookings", tags=["bookings"])
 
 
 @router.get("", response_model=list[BookingOut])
-async def list_bookings():
+async def list_bookings(business_id: str | None = None):
     db = get_supabase()
-    result = db.table("bookings").select("*").order("date").order("time").execute()
+    query = db.table("bookings").select("*").order("date").order("time")
+    if business_id:
+        query = query.eq("business_id", business_id)
+    result = query.execute()
     return result.data or []
 
 

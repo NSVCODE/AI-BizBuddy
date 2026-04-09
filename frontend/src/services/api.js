@@ -18,8 +18,8 @@ export const getMessages = (session_id) =>
   api.get(`/api/chat/conversations/${session_id}/messages`).then(r => r.data)
 
 // Leads
-export const getLeads = () =>
-  api.get('/api/leads').then(r => r.data)
+export const getLeads = (business_id) =>
+  api.get('/api/leads', { params: business_id ? { business_id } : {} }).then(r => r.data)
 
 export const updateLead = (id, data) =>
   api.patch(`/api/leads/${id}`, data).then(r => r.data)
@@ -28,8 +28,8 @@ export const deleteLead = (id) =>
   api.delete(`/api/leads/${id}`).then(r => r.data)
 
 // Bookings
-export const getBookings = () =>
-  api.get('/api/bookings').then(r => r.data)
+export const getBookings = (business_id) =>
+  api.get('/api/bookings', { params: business_id ? { business_id } : {} }).then(r => r.data)
 
 export const updateBookingStatus = (id, status) =>
   api.patch(`/api/bookings/${id}/status`, { status }).then(r => r.data)

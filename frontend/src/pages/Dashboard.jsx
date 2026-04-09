@@ -34,7 +34,7 @@ export default function Dashboard() {
   const fetchAll = useCallback(async () => {
     setLoading(true)
     try {
-      const [s, l, b, c] = await Promise.all([getAnalytics(), getLeads(), getBookings(), getConversations()])
+      const [s, l, b, c] = await Promise.all([getAnalytics(), getLeads(businessId), getBookings(businessId), getConversations()])
       setStats(s); setLeads(l)
       // Dedup: per (phone, date, time), keep highest-status entry
       const statusRank = { confirmed: 3, pending: 2, cancelled: 1, completed: 0 }
@@ -85,7 +85,7 @@ export default function Dashboard() {
     }
   }, [user])
 
-  useEffect(() => { fetchAll() }, [fetchAll])
+  useEffect(() => { fetchAll() }, [fetchAll, businessId])
   useEffect(() => {
     const iv = setInterval(fetchAll, 30000)
     return () => clearInterval(iv)

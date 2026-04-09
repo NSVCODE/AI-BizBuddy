@@ -7,9 +7,12 @@ router = APIRouter(prefix="/api/leads", tags=["leads"])
 
 
 @router.get("", response_model=list[LeadOut])
-async def list_leads():
+async def list_leads(business_id: str | None = None):
     db = get_supabase()
-    result = db.table("leads").select("*").order("created_at", desc=True).execute()
+    query = db.table("leads").select("*").order("created_at", desc=True)
+    if business_id:
+        query = query.eq("business_id", business_id)
+    result = query.execute()
     return result.data or []
 
 
