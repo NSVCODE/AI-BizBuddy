@@ -19,7 +19,7 @@ def check_availability(booking_date: str, booking_time: str, party_size: int) ->
     if party_size > max_party:
         return {
             "available": False,
-            "message": f"Sorry, we can accommodate a maximum of {max_party} guests per booking. For larger groups, please contact us directly at +91 98765 43210.",
+            "message": f"Sorry, we can accommodate a maximum of {max_party} guests per booking. For larger groups, please contact us directly.",
         }
 
     # Parse date
@@ -114,7 +114,7 @@ def create_booking(
         f"📍 LatteLune, Indiranagar, Bengaluru\n"
         f"📞 {phone}\n"
         + (f"📝 Notes: {special_requests}\n" if special_requests else "")
-        + f"\nWe can't wait to see you! If you need to make changes, call us at +91 98765 43210."
+        + f"\nWe can't wait to see you! If you need to make any changes, feel free to message us here."
     )
 
     return {"booking": booking, "confirmation_message": confirmation}

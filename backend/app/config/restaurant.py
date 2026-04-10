@@ -101,7 +101,7 @@ RESTAURANT_CONFIG = {
     ],
     "booking_slots": {
         "duration_minutes": 90,
-        "max_party_size": 8,
+        "max_party_size": 6,
         "min_advance_hours": 1,
         "slot_times": ["09:00", "10:30", "12:00", "13:30", "15:00", "16:30", "18:00", "19:30", "20:30"],
     },

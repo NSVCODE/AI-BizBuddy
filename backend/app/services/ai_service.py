@@ -227,13 +227,14 @@ def execute_tool(tool_name: str, tool_input: dict, channel: str = "web_chat") ->
                 party_size=tool_input["party_size"],
                 special_requests=tool_input.get("special_requests"),
             )
-            # Also capture as a lead
+            # Also capture as a converted lead
             capture_lead(
                 name=tool_input["customer_name"],
                 phone=tool_input["phone"],
                 source=channel,
                 inquiry_type="reservation",
                 notes=f"Booked table for {tool_input['party_size']} on {tool_input['date']} at {tool_input['time']}",
+                status="converted",
             )
             return json.dumps({"confirmation": result["confirmation_message"], "booking_id": result["booking"].get("id")})
 

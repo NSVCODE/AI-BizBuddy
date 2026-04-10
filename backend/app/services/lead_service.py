@@ -13,6 +13,7 @@ def capture_lead(
     source: str = "web_chat",
     inquiry_type: Optional[str] = None,
     notes: Optional[str] = None,
+    status: str = "new",
 ) -> dict:
     """
     Upsert a lead. If same phone exists, update; otherwise insert.
@@ -25,7 +26,7 @@ def capture_lead(
         "phone": phone,
         "email": email,
         "source": source,
-        "status": "new",
+        "status": status,
         "inquiry_type": inquiry_type,
         "notes": notes,
     }
