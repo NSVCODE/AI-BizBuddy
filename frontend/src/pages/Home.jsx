@@ -93,8 +93,12 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', background: 'var(--white)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
-        <div className="spinner" style={{ borderTopColor: 'var(--navy)', borderColor: 'rgba(0,0,0,0.08)', width: '28px', height: '28px' }} />
+      <div style={{ minHeight: '100vh', background: 'var(--white)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '14px' }}>
+        <img
+          src="/favicon.png"
+          alt="Loading"
+          style={{ width: '48px', height: '48px', animation: 'spin 1s linear infinite' }}
+        />
         <div style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>Loading…</div>
       </div>
     )
