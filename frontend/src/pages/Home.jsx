@@ -97,7 +97,7 @@ export default function Home() {
         <img
           src="/favicon.png"
           alt="Loading"
-          style={{ width: '48px', height: '48px', animation: 'spin 1s linear infinite' }}
+          style={{ width: '96px', height: '96px', animation: 'spin 1s linear infinite' }}
         />
         <div style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>Loading…</div>
       </div>
