@@ -33,7 +33,10 @@ def get_anthropic_client() -> anthropic.Anthropic:
 # ── System Prompt ─────────────────────────────────────────────────────────────
 
 def _get_active_business(business_id: str | None = None) -> dict | None:
-    """Fetch a specific business by ID, or fall back to most recently registered."""
+    """Fetch a specific business by ID, or fall back to most recently registered.
+    Pass business_id="static" to force the static LatteLune fallback config."""
+    if business_id == "static":
+        return None
     try:
         db = get_supabase()
         if business_id:

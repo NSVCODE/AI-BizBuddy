@@ -77,7 +77,7 @@ async def simulate_whatsapp_message(msg: WhatsAppMessage):
         ctx = _get_returning_customer_context(msg.phone)
         if ctx:
             message = f"{ctx}\n\n{msg.message}"
-    reply = process_message(session_id, message, channel="whatsapp")
+    reply = process_message(session_id, message, channel="whatsapp", business_id="static")
     return ChatResponse(session_id=session_id, reply=reply, channel="whatsapp")
 
 
@@ -100,7 +100,7 @@ async def handle_missed_call(req: MissedCallRequest):
         f"acknowledging the missed call, apologising briefly, and offering to help them with "
         f"anything. Keep it short and friendly.]"
     )
-    reply = process_message(session_id, trigger_message, channel="whatsapp")
+    reply = process_message(session_id, trigger_message, channel="whatsapp", business_id="static")
 
     return {
         "lead_id": lead.get("id"),
@@ -123,7 +123,7 @@ async def incoming_whatsapp_message(msg: WhatsAppMessage):
         ctx = _get_returning_customer_context(msg.phone)
         if ctx:
             message = f"{ctx}\n\n{msg.message}"
-    reply = process_message(session_id, message, channel="whatsapp")
+    reply = process_message(session_id, message, channel="whatsapp", business_id="static")
     return ChatResponse(session_id=session_id, reply=reply, channel="whatsapp")
 
 
