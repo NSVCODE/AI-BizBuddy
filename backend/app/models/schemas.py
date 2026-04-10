@@ -123,3 +123,37 @@ class AnalyticsSummary(BaseModel):
     missed_call_leads: int
     confirmed_bookings: int
     pending_bookings: int
+
+
+class PeakHour(BaseModel):
+    hour: int
+    count: int
+
+
+class QueryType(BaseModel):
+    type: str
+    count: int
+
+
+class ConversionStats(BaseModel):
+    inquiries: int
+    bookings: int
+    rate: float
+
+
+class SentimentBreakdown(BaseModel):
+    positive: int
+    neutral: int
+    negative: int
+
+
+class AnalyticsDetailed(BaseModel):
+    total_customers: int
+    messages_handled: int
+    conversion_rate: float
+    inquiries_to_bookings: ConversionStats
+    chats_to_purchases: ConversionStats
+    peak_hours: List[PeakHour]
+    top_queries: List[QueryType]
+    ai_suggestions: List[str]
+    sentiment: SentimentBreakdown

@@ -6,6 +6,7 @@ import LeadsTable from '../components/Dashboard/LeadsTable'
 import BookingsTable from '../components/Dashboard/BookingsTable'
 import ConversationsPanel from '../components/Dashboard/ConversationsPanel'
 import WhatsAppConnect from '../components/WhatsAppConnect/WhatsAppConnect'
+import AnalyticsPanel from '../components/Dashboard/AnalyticsPanel'
 import { getAnalytics, getLeads, getBookings, getConversations, getFAQs, createFAQ, updateFAQ, deleteFAQ } from '../services/api'
 
 const NAV = [
@@ -16,6 +17,7 @@ const NAV = [
   { id: 'bookings',       label: 'Bookings',        icon: CalendarIcon },
   { id: 'conversations',  label: 'Conversations',   icon: ChatIcon },
   { id: 'faqs',           label: 'FAQs',            icon: FAQIcon },
+  { id: 'analytics',     label: 'Analytics',       icon: AnalyticsIcon },
 ]
 
 export default function Dashboard() {
@@ -121,6 +123,7 @@ export default function Dashboard() {
     bookings: 'Bookings',
     conversations: 'Conversations',
     faqs: 'Custom FAQs',
+    analytics: 'Analytics',
   }
 
   return (
@@ -277,6 +280,12 @@ export default function Dashboard() {
             </div>
           )}
 
+          {active === 'analytics' && (
+            <div className="fade-in">
+              <AnalyticsPanel />
+            </div>
+          )}
+
         </div>
       </main>
     </div>
@@ -356,6 +365,16 @@ function FAQIcon({ size = 16, className = '' }) {
       <circle cx="12" cy="12" r="10"/>
       <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
       <line x1="12" y1="17" x2="12.01" y2="17" strokeWidth="2.5" strokeLinecap="round"/>
+    </svg>
+  )
+}
+function AnalyticsIcon({ size = 16, className = '' }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <line x1="18" y1="20" x2="18" y2="10"/>
+      <line x1="12" y1="20" x2="12" y2="4"/>
+      <line x1="6" y1="20" x2="6" y2="14"/>
+      <line x1="2" y1="20" x2="22" y2="20"/>
     </svg>
   )
 }

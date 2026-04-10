@@ -48,6 +48,9 @@ export const simulateMissedCall = (phone, caller_name = null) =>
 export const getAnalytics = () =>
   api.get('/api/analytics/summary').then(r => r.data)
 
+export const getAnalyticsDetailed = () =>
+  api.get('/api/analytics/detailed').then(r => r.data)
+
 // FAQs
 export const getFAQs = (business_id) =>
   api.get('/api/faqs', { params: business_id ? { business_id } : {} }).then(r => r.data)
