@@ -11,7 +11,7 @@ async def list_bookings(business_id: str | None = None):
     db = get_supabase()
     query = db.table("bookings").select("*").order("date").order("time")
     if business_id:
-        query = query.or_(f"business_id.eq.{business_id},business_id.is.null")
+        query = query.eq("business_id", business_id)
     result = query.execute()
     return result.data or []
 

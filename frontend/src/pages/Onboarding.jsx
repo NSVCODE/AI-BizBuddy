@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
+import { seedDemoData } from '../services/api'
 
 const TYPES = [
   { id: 'restaurant', label: 'Restaurant / Café', desc: 'Dine-in, takeaway, reservations' },
@@ -34,6 +35,17 @@ export default function Onboarding() {
         phone: form.phone, email: form.email, description: form.description,
       })
       if (error) throw error
+      // Seed type-appropriate demo data for this business
+      const { data: biz } = await supabase
+        .from('businesses')
+        .select('id')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single()
+      if (biz?.id) {
+        await seedDemoData(biz.id, selectedType).catch(() => {})
+      }
       setStep(3)
       setTimeout(() => navigate('/dashboard'), 1800)
     } catch (err) {

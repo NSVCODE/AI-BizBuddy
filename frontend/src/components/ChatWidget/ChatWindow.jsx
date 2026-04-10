@@ -92,7 +92,7 @@ function Message({ msg }) {
   )
 }
 
-export default function ChatWindow({ onNewMessage }) {
+export default function ChatWindow({ onNewMessage, businessId }) {
   const [business, setBusiness] = useState(null)
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
@@ -145,7 +145,7 @@ export default function ChatWindow({ onNewMessage }) {
     setIsLoading(true)
 
     try {
-      const data = await sendMessage(sessionId, text, 'web_chat')
+      const data = await sendMessage(sessionId, text, 'web_chat', businessId || business?.id)
       const aiMsg = { id: uuidv4(), role: 'assistant', content: data.reply, emoji: cfg.emoji, time: new Date() }
       setMessages(prev => [...prev, aiMsg])
       onNewMessage?.()

@@ -46,6 +46,7 @@ create table if not exists messages (
 -- ── Leads ────────────────────────────────────────────────────
 create table if not exists leads (
   id            uuid primary key default gen_random_uuid(),
+  business_id   uuid references businesses(id) on delete cascade,
   name          text,
   phone         text,
   email         text,
@@ -59,6 +60,7 @@ create table if not exists leads (
 -- ── Bookings ─────────────────────────────────────────────────
 create table if not exists bookings (
   id                uuid primary key default gen_random_uuid(),
+  business_id       uuid references businesses(id) on delete cascade,
   lead_id           uuid references leads(id) on delete set null,
   customer_name     text not null,
   phone             text not null,
@@ -69,6 +71,10 @@ create table if not exists bookings (
   special_requests  text,
   created_at        timestamptz default now()
 );
+
+-- ── Migration: add business_id to existing tables (run if tables already exist)
+-- alter table leads add column if not exists business_id uuid references businesses(id) on delete cascade;
+-- alter table bookings add column if not exists business_id uuid references businesses(id) on delete cascade;
 
 -- ── FAQs ─────────────────────────────────────────────────────
 create table if not exists faqs (

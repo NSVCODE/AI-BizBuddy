@@ -8,8 +8,8 @@ const api = axios.create({
 })
 
 // Chat
-export const sendMessage = (session_id, message, channel = 'web_chat') =>
-  api.post('/api/chat', { session_id, message, channel }).then(r => r.data)
+export const sendMessage = (session_id, message, channel = 'web_chat', business_id = null) =>
+  api.post('/api/chat', { session_id, message, channel, ...(business_id && { business_id }) }).then(r => r.data)
 
 export const getConversations = () =>
   api.get('/api/chat/conversations').then(r => r.data)
@@ -50,6 +50,9 @@ export const getAnalytics = () =>
 
 export const getAnalyticsDetailed = () =>
   api.get('/api/analytics/detailed').then(r => r.data)
+
+export const seedDemoData = (business_id, type) =>
+  api.post('/api/business/seed-demo', { business_id, type }).then(r => r.data)
 
 // FAQs
 export const getFAQs = (business_id) =>

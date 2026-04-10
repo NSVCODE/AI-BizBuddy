@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import ChatBubble from './ChatBubble'
 import ChatWindow from './ChatWindow'
 
-export default function ChatWidget() {
+export default function ChatWidget({ businessId }) {
   const [isOpen, setIsOpen] = useState(false)
   const [unread, setUnread] = useState(1) // start with 1 to draw attention
 
@@ -13,7 +13,7 @@ export default function ChatWidget() {
 
   return (
     <>
-      {isOpen && <ChatWindow onNewMessage={() => {}} />}
+      {isOpen && <ChatWindow onNewMessage={() => {}} businessId={businessId} />}
       <ChatBubble
         onClick={isOpen ? () => setIsOpen(false) : handleOpen}
         isOpen={isOpen}

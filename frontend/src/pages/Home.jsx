@@ -336,7 +336,7 @@ export default function Home() {
         </div>
       </footer>
 
-      <ChatWidget />
+      <ChatWidget businessId={business?.id} />
     </div>
   )
 }

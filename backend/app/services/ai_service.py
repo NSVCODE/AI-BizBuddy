@@ -32,11 +32,14 @@ def get_anthropic_client() -> anthropic.Anthropic:
 
 # ── System Prompt ─────────────────────────────────────────────────────────────
 
-def _get_active_business() -> dict | None:
-    """Fetch the most recently registered business from Supabase."""
+def _get_active_business(business_id: str | None = None) -> dict | None:
+    """Fetch a specific business by ID, or fall back to most recently registered."""
     try:
         db = get_supabase()
-        result = db.table("businesses").select("*").order("created_at", desc=True).limit(1).execute()
+        if business_id:
+            result = db.table("businesses").select("*").eq("id", business_id).limit(1).execute()
+        else:
+            result = db.table("businesses").select("*").order("created_at", desc=True).limit(1).execute()
         return result.data[0] if result.data else None
     except Exception as e:
         import sys
@@ -72,10 +75,10 @@ TYPE_PERSONAS = {
 }
 
 
-def build_system_prompt() -> str:
+def build_system_prompt(business_id: str | None = None) -> str:
     import sys
     cfg = RESTAURANT_CONFIG
-    business = _get_active_business()
+    business = _get_active_business(business_id)
     print(f"[BizBuddy DEBUG] build_system_prompt: business={business}", file=sys.stderr)
 
     # Use real business data if available, else fall back to LatteLune config
@@ -213,7 +216,7 @@ TOOLS = [
 
 # ── Tool Execution ────────────────────────────────────────────────────────────
 
-def execute_tool(tool_name: str, tool_input: dict, channel: str = "web_chat") -> str:
+def execute_tool(tool_name: str, tool_input: dict, channel: str = "web_chat", business_id: str | None = None) -> str:
     try:
         if tool_name == "check_availability":
             result = check_availability(
@@ -229,6 +232,7 @@ def execute_tool(tool_name: str, tool_input: dict, channel: str = "web_chat") ->
                 booking_time=tool_input["time"],
                 party_size=tool_input["party_size"],
                 special_requests=tool_input.get("special_requests"),
+                business_id=business_id,
             )
             # Also capture as a converted lead
             capture_lead(
@@ -236,8 +240,9 @@ def execute_tool(tool_name: str, tool_input: dict, channel: str = "web_chat") ->
                 phone=tool_input["phone"],
                 source=channel,
                 inquiry_type="reservation",
-                notes=f"Booked table for {tool_input['party_size']} on {tool_input['date']} at {tool_input['time']}",
+                notes=f"Booked for {tool_input['party_size']} on {tool_input['date']} at {tool_input['time']}",
                 status="converted",
+                business_id=business_id,
             )
             return json.dumps({"confirmation": result["confirmation_message"], "booking_id": result["booking"].get("id")})
 
@@ -249,6 +254,7 @@ def execute_tool(tool_name: str, tool_input: dict, channel: str = "web_chat") ->
                 source=channel,
                 inquiry_type=tool_input.get("inquiry_type"),
                 notes=tool_input.get("notes"),
+                business_id=business_id,
             )
             return json.dumps({"status": "saved", "lead_id": result.get("id")})
 
@@ -316,7 +322,7 @@ def save_messages(conversation_id: str, messages: list[dict]) -> None:
 
 # ── Main Entry Point ──────────────────────────────────────────────────────────
 
-def process_message(session_id: str, user_message: str, channel: str = "web_chat") -> str:
+def process_message(session_id: str, user_message: str, channel: str = "web_chat", business_id: str | None = None) -> str:
     """
     Process a user message and return the AI's response.
     Handles multi-turn history and Claude tool calling.
@@ -337,7 +343,7 @@ def process_message(session_id: str, user_message: str, channel: str = "web_chat
         response = client.messages.create(
             model="claude-haiku-4-5-20251001",
             max_tokens=1024,
-            system=build_system_prompt(),
+            system=build_system_prompt(business_id),
             tools=TOOLS,
             messages=messages,
         )
@@ -359,7 +365,7 @@ def process_message(session_id: str, user_message: str, channel: str = "web_chat
         # Execute tools and collect results
         tool_results = []
         for tool_block in tool_use_blocks:
-            tool_result = execute_tool(tool_block.name, tool_block.input, channel)
+            tool_result = execute_tool(tool_block.name, tool_block.input, channel, business_id)
             tool_results.append({
                 "type": "tool_result",
                 "tool_use_id": tool_block.id,

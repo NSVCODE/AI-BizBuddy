@@ -91,6 +91,7 @@ def create_booking(
     party_size: int,
     special_requests: Optional[str] = None,
     lead_id: Optional[str] = None,
+    business_id: Optional[str] = None,
 ) -> dict:
     """
     Create a booking in Supabase.
@@ -108,6 +109,8 @@ def create_booking(
         "special_requests": special_requests,
         "lead_id": lead_id,
     }
+    if business_id:
+        record["business_id"] = business_id
 
     result = db.table("bookings").insert(record).execute()
     booking = result.data[0] if result.data else record

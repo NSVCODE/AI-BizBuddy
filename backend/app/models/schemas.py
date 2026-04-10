@@ -11,6 +11,7 @@ class ChatRequest(BaseModel):
     message: str
     channel: str = "web_chat"  # "web_chat" | "whatsapp"
     customer_phone: Optional[str] = None
+    business_id: Optional[str] = None
 
 
 class ChatResponse(BaseModel):

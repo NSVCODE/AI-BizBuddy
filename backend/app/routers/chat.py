@@ -11,7 +11,7 @@ router = APIRouter(prefix="/api/chat", tags=["chat"])
 async def chat(req: ChatRequest):
     """Send a message and get an AI response."""
     try:
-        reply = process_message(req.session_id, req.message, req.channel)
+        reply = process_message(req.session_id, req.message, req.channel, req.business_id)
         return ChatResponse(session_id=req.session_id, reply=reply, channel=req.channel)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
