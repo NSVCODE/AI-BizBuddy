@@ -155,5 +155,6 @@ class AnalyticsDetailed(BaseModel):
     chats_to_purchases: ConversionStats
     peak_hours: List[PeakHour]
     top_queries: List[QueryType]
+    frequent_questions: List[str]
     ai_suggestions: List[str]
     sentiment: SentimentBreakdown

@@ -282,7 +282,7 @@ export default function Dashboard() {
 
           {active === 'analytics' && (
             <div className="fade-in">
-              <AnalyticsPanel />
+              <AnalyticsPanel businessId={businessId} onNavigate={setActive} />
             </div>
           )}
 

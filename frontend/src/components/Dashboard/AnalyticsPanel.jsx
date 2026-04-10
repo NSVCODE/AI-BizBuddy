@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import { getAnalyticsDetailed } from '../../services/api'
+import { getAnalyticsDetailed, createFAQ } from '../../services/api'
 
-export default function AnalyticsPanel() {
+export default function AnalyticsPanel({ businessId, onNavigate }) {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [addingFAQ, setAddingFAQ] = useState(null) // question string being added
 
   useEffect(() => {
     getAnalyticsDetailed()
@@ -12,13 +13,25 @@ export default function AnalyticsPanel() {
       .finally(() => setLoading(false))
   }, [])
 
+  const handleAddFAQ = async (question) => {
+    if (!businessId) return
+    setAddingFAQ(question)
+    try {
+      await createFAQ(question, '(Add your answer here)', businessId)
+      onNavigate('faqs')
+    } catch (err) {
+      console.error('FAQ create error:', err)
+    } finally {
+      setAddingFAQ(null)
+    }
+  }
+
   if (loading) return <p className="text-slate-500 text-sm">Loading analytics…</p>
   if (!data) return <p className="text-slate-500 text-sm">Failed to load analytics.</p>
 
   const maxPeak = Math.max(...data.peak_hours.map(h => h.count), 1)
   const sentimentTotal = data.sentiment.positive + data.sentiment.neutral + data.sentiment.negative || 1
 
-  // SVG donut chart values (circumference = 2π × 36 ≈ 226)
   const C = 226
   const posAngle = (data.sentiment.positive / sentimentTotal) * C
   const neuAngle = (data.sentiment.neutral / sentimentTotal) * C
@@ -35,15 +48,15 @@ export default function AnalyticsPanel() {
 
       {/* ── KPI Cards ─────────────────────────────────────── */}
       <div className="grid grid-cols-4 gap-4">
-        <KPICard label="Total Customers" value={data.total_customers} icon="👥" />
-        <KPICard label="Messages Handled" value={data.messages_handled} icon="💬" />
-        <KPICard label="Conversion Rate" value={`${data.conversion_rate}%`} icon="📈" accent />
-        <KPICard label="Confirmed Bookings" value={data.inquiries_to_bookings.bookings} icon="📅" />
+        <KPICard label="Total Customers" value={data.total_customers} icon={<UsersIcon />} />
+        <KPICard label="Messages Handled" value={data.messages_handled} icon={<MessageIcon />} />
+        <KPICard label="Conversion Rate" value={`${data.conversion_rate}%`} icon={<TrendingUpIcon />} accent />
+        <KPICard label="Confirmed Bookings" value={data.inquiries_to_bookings.bookings} icon={<CalendarIcon />} />
       </div>
 
       {/* ── Conversion Insights ───────────────────────────── */}
       <div className="glass p-5 flex flex-col gap-4">
-        <h2 className="text-white font-semibold text-sm">📈 Conversion Insights</h2>
+        <SectionHeader icon={<TrendingUpIcon size={14} />} title="Conversion Insights" />
         <div className="grid grid-cols-2 gap-4">
           <ConversionCard
             label="Inquiries → Bookings"
@@ -68,7 +81,7 @@ export default function AnalyticsPanel() {
 
         {/* ── Peak Hours Bar Chart ──────────────────────────── */}
         <div className="glass p-5 flex flex-col gap-3">
-          <h2 className="text-white font-semibold text-sm">⏰ Peak Hours</h2>
+          <SectionHeader icon={<ClockIcon size={14} />} title="Peak Hours" />
           <p className="text-slate-500 text-xs -mt-1">Customer message volume by hour of day</p>
           <div className="flex items-end gap-px h-28 mt-2">
             {data.peak_hours.map(({ hour, count }) => {
@@ -89,7 +102,6 @@ export default function AnalyticsPanel() {
                       transition: 'height 0.3s',
                     }}
                   />
-                  {/* Tooltip */}
                   {count > 0 && (
                     <div className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 bg-slate-800 border border-white/10 rounded px-1.5 py-0.5 text-xs text-white whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none z-10">
                       {hourLabel(hour)}: {count}
@@ -99,7 +111,6 @@ export default function AnalyticsPanel() {
               )
             })}
           </div>
-          {/* X-axis labels: every 6 hours */}
           <div className="flex justify-between text-xs text-slate-600 mt-1">
             <span>12a</span><span>6a</span><span>12p</span><span>6p</span><span>11p</span>
           </div>
@@ -111,12 +122,11 @@ export default function AnalyticsPanel() {
 
         {/* ── Sentiment Donut ───────────────────────────────── */}
         <div className="glass p-5 flex flex-col gap-3">
-          <h2 className="text-white font-semibold text-sm">😊 Customer Sentiment</h2>
+          <SectionHeader icon={<SmileIcon size={14} />} title="Customer Sentiment" />
           <p className="text-slate-500 text-xs -mt-1">Based on lead conversion status</p>
           <div className="flex items-center gap-6 mt-2">
             <svg width={100} height={100} viewBox="0 0 100 100">
               <circle cx="50" cy="50" r="36" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="16" />
-              {/* Positive (green) */}
               <circle
                 cx="50" cy="50" r="36" fill="none"
                 stroke="#22c55e" strokeWidth="16"
@@ -124,7 +134,6 @@ export default function AnalyticsPanel() {
                 strokeDashoffset="0"
                 transform="rotate(-90 50 50)"
               />
-              {/* Neutral (slate) */}
               <circle
                 cx="50" cy="50" r="36" fill="none"
                 stroke="#64748b" strokeWidth="16"
@@ -132,7 +141,6 @@ export default function AnalyticsPanel() {
                 strokeDashoffset={`${-posAngle}`}
                 transform="rotate(-90 50 50)"
               />
-              {/* Negative (red) */}
               <circle
                 cx="50" cy="50" r="36" fill="none"
                 stroke="#ef4444" strokeWidth="16"
@@ -156,41 +164,33 @@ export default function AnalyticsPanel() {
 
       <div className="grid grid-cols-2 gap-6">
 
-        {/* ── Top Queries ───────────────────────────────────── */}
+        {/* ── Frequently Asked ──────────────────────────────── */}
         <div className="glass p-5 flex flex-col gap-3">
-          <h2 className="text-white font-semibold text-sm">🔍 Top Query Types</h2>
-          {data.top_queries.length === 0 ? (
-            <p className="text-slate-500 text-xs">No query data yet.</p>
+          <SectionHeader icon={<MessageCircleIcon size={14} />} title="Frequently Asked" />
+          <p className="text-slate-500 text-xs -mt-1">Real questions from customers — add them as FAQs to save AI credits</p>
+          {data.frequent_questions.length === 0 ? (
+            <p className="text-slate-500 text-xs mt-1">No question data yet. Questions from WhatsApp and Instagram will appear here.</p>
           ) : (
             <div className="flex flex-col gap-2 mt-1">
-              {data.top_queries.map(({ type, count }, i) => {
-                const maxCount = data.top_queries[0].count
-                const pct = Math.round((count / maxCount) * 100)
-                return (
-                  <div key={type} className="flex flex-col gap-1">
-                    <div className="flex justify-between text-xs">
-                      <span className="text-slate-300 capitalize">{type.replace('_', ' ')}</span>
-                      <span className="text-slate-500">{count}</span>
-                    </div>
-                    <div className="h-1.5 rounded-full bg-white/[.06] overflow-hidden">
-                      <div
-                        className="h-full rounded-full"
-                        style={{
-                          width: `${pct}%`,
-                          background: i === 0 ? '#2563eb' : 'rgba(255,255,255,0.2)',
-                        }}
-                      />
-                    </div>
-                  </div>
-                )
-              })}
+              {data.frequent_questions.map((q, i) => (
+                <div key={i} className="flex items-start justify-between gap-3 py-2 border-b border-white/[.05] last:border-0">
+                  <p className="text-slate-300 text-xs leading-relaxed flex-1">{q}</p>
+                  <button
+                    onClick={() => handleAddFAQ(q)}
+                    disabled={addingFAQ === q}
+                    className="shrink-0 text-xs text-blue-400 hover:text-blue-300 border border-blue-500/30 hover:border-blue-400/50 rounded px-2 py-0.5 transition-colors disabled:opacity-50"
+                  >
+                    {addingFAQ === q ? '…' : '+ FAQ'}
+                  </button>
+                </div>
+              ))}
             </div>
           )}
         </div>
 
         {/* ── AI Suggestions ────────────────────────────────── */}
         <div className="glass p-5 flex flex-col gap-3">
-          <h2 className="text-white font-semibold text-sm">🤖 AI Suggestions</h2>
+          <SectionHeader icon={<SparkleIcon size={14} />} title="AI Suggestions" />
           <div className="flex flex-col gap-3 mt-1">
             {data.ai_suggestions.map((suggestion, i) => (
               <div key={i} className="flex gap-3 items-start">
@@ -206,13 +206,26 @@ export default function AnalyticsPanel() {
   )
 }
 
+// ── Sub-components ─────────────────────────────────────────────
+
+function SectionHeader({ icon, title }) {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="text-slate-400">{icon}</span>
+      <h2 className="text-white font-semibold text-sm">{title}</h2>
+    </div>
+  )
+}
+
 function KPICard({ label, value, icon, accent }) {
   return (
-    <div className={`glass p-4 flex flex-col gap-1 ${accent ? 'border-blue-500/30' : ''}`}
-      style={accent ? { borderColor: 'rgba(37,99,235,0.3)' } : {}}>
+    <div
+      className="glass p-4 flex flex-col gap-1"
+      style={accent ? { borderColor: 'rgba(37,99,235,0.3)' } : {}}
+    >
       <div className="flex items-center justify-between">
         <span className="text-slate-500 text-xs">{label}</span>
-        <span className="text-base">{icon}</span>
+        <span className={accent ? 'text-blue-400' : 'text-slate-400'}>{icon}</span>
       </div>
       <span className={`text-2xl font-bold ${accent ? 'text-blue-400' : 'text-white'}`}>{value}</span>
     </div>
@@ -248,5 +261,80 @@ function SentimentLegend({ color, label, count }) {
       <span className="text-xs text-slate-400">{label}</span>
       <span className="text-xs text-slate-600 ml-auto">{count}</span>
     </div>
+  )
+}
+
+// ── Inline SVG Icons ───────────────────────────────────────────
+
+function UsersIcon({ size = 15 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+      <circle cx="9" cy="7" r="4"/>
+      <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+    </svg>
+  )
+}
+
+function MessageIcon({ size = 15 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+    </svg>
+  )
+}
+
+function TrendingUpIcon({ size = 15 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+      <polyline points="17 6 23 6 23 12"/>
+    </svg>
+  )
+}
+
+function CalendarIcon({ size = 15 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+      <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+      <line x1="3" y1="10" x2="21" y2="10"/>
+    </svg>
+  )
+}
+
+function ClockIcon({ size = 15 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <polyline points="12 6 12 12 16 14"/>
+    </svg>
+  )
+}
+
+function SmileIcon({ size = 15 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+      <line x1="9" y1="9" x2="9.01" y2="9" strokeWidth="2.5" strokeLinecap="round"/>
+      <line x1="15" y1="9" x2="15.01" y2="9" strokeWidth="2.5" strokeLinecap="round"/>
+    </svg>
+  )
+}
+
+function MessageCircleIcon({ size = 15 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+    </svg>
+  )
+}
+
+function SparkleIcon({ size = 15 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/>
+    </svg>
   )
 }

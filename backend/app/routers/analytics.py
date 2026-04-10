@@ -52,7 +52,7 @@ async def get_detailed():
 
     leads = db.table("leads").select("status, inquiry_type, source").execute().data or []
     bookings = db.table("bookings").select("id").execute().data or []
-    messages = db.table("messages").select("role, created_at").execute().data or []
+    messages = db.table("messages").select("role, content, created_at").execute().data or []
     conversations = db.table("conversations").select("id").execute().data or []
 
     total_customers = len(leads)
@@ -86,6 +86,29 @@ async def get_detailed():
         l["inquiry_type"] for l in leads if l.get("inquiry_type")
     )
     top_queries = [QueryType(type=t, count=c) for t, c in query_counts.most_common(5)]
+
+    # Frequent questions: unique user messages containing "?" from all channels,
+    # ordered by recency — these are real questions customers asked via chat/WhatsApp/Instagram
+    QUESTION_WORDS = ("what", "when", "how", "do you", "can you", "is there", "are you", "where", "why", "which")
+    seen_questions: set = set()
+    frequent_questions: list[str] = []
+    for m in sorted(messages, key=lambda x: x.get("created_at") or "", reverse=True):
+        if m.get("role") != "user":
+            continue
+        content = (m.get("content") or "").strip()
+        if len(content) < 10 or len(content) > 300:
+            continue
+        cl = content.lower()
+        is_question = "?" in content or any(cl.startswith(w) for w in QUESTION_WORDS)
+        if not is_question:
+            continue
+        key = cl.rstrip("?").strip()
+        if key in seen_questions:
+            continue
+        seen_questions.add(key)
+        frequent_questions.append(content)
+        if len(frequent_questions) >= 8:
+            break
 
     # Sentiment proxy from lead status
     sentiment = SentimentBreakdown(
@@ -146,6 +169,7 @@ async def get_detailed():
         chats_to_purchases=ConversionStats(inquiries=total_convs, bookings=total_bookings, rate=chat_rate),
         peak_hours=peak_hours,
         top_queries=top_queries,
+        frequent_questions=frequent_questions,
         ai_suggestions=suggestions,
         sentiment=sentiment,
     )
