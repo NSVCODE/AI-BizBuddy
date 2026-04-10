@@ -29,7 +29,6 @@ export default function AnalyticsPanel({ businessId, onNavigate }) {
   if (loading) return <p className="text-slate-500 text-sm">Loading analytics…</p>
   if (!data) return <p className="text-slate-500 text-sm">Failed to load analytics.</p>
 
-  const maxPeak = Math.max(...data.peak_hours.map(h => h.count), 1)
   const sentimentTotal = data.sentiment.positive + data.sentiment.neutral + data.sentiment.negative || 1
 
   const C = 226
@@ -79,45 +78,11 @@ export default function AnalyticsPanel({ businessId, onNavigate }) {
 
       <div className="grid grid-cols-2 gap-6">
 
-        {/* ── Peak Hours Bar Chart ──────────────────────────── */}
+        {/* ── Peak Hours Line Graph ─────────────────────────── */}
         <div className="glass p-5 flex flex-col gap-3">
           <SectionHeader icon={<ClockIcon size={14} />} title="Peak Hours" />
           <p className="text-slate-500 text-xs -mt-1">Customer message volume by hour of day</p>
-          <div className="flex items-end gap-px h-28 mt-2">
-            {data.peak_hours.map(({ hour, count }) => {
-              const heightPct = maxPeak > 0 ? (count / maxPeak) * 100 : 0
-              const isEvening = hour >= 17 && hour <= 21
-              return (
-                <div
-                  key={hour}
-                  className="flex-1 flex flex-col items-center justify-end group relative"
-                  style={{ height: '100%' }}
-                >
-                  <div
-                    style={{
-                      height: `${Math.max(heightPct, 4)}%`,
-                      background: isEvening ? '#2563eb' : 'rgba(255,255,255,0.1)',
-                      borderRadius: '2px 2px 0 0',
-                      width: '100%',
-                      transition: 'height 0.3s',
-                    }}
-                  />
-                  {count > 0 && (
-                    <div className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 bg-slate-800 border border-white/10 rounded px-1.5 py-0.5 text-xs text-white whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none z-10">
-                      {hourLabel(hour)}: {count}
-                    </div>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-          <div className="flex justify-between text-xs text-slate-600 mt-1">
-            <span>12a</span><span>6a</span><span>12p</span><span>6p</span><span>11p</span>
-          </div>
-          <div className="flex items-center gap-2 mt-1">
-            <div className="w-2 h-2 rounded-sm bg-blue-600" />
-            <span className="text-xs text-slate-500">Evening peak (5–9 PM)</span>
-          </div>
+          <PeakLineChart hours={data.peak_hours} hourLabel={hourLabel} />
         </div>
 
         {/* ── Sentiment Donut ───────────────────────────────── */}
@@ -224,7 +189,7 @@ function KPICard({ label, value, icon, accent }) {
       style={accent ? { borderColor: 'rgba(37,99,235,0.3)' } : {}}
     >
       <div className="flex items-center justify-between">
-        <span className="text-slate-500 text-xs">{label}</span>
+        <span className="text-blue-400 text-xs font-medium">{label}</span>
         <span className={accent ? 'text-blue-400' : 'text-slate-400'}>{icon}</span>
       </div>
       <span className={`text-2xl font-bold ${accent ? 'text-blue-400' : 'text-white'}`}>{value}</span>
@@ -235,7 +200,7 @@ function KPICard({ label, value, icon, accent }) {
 function ConversionCard({ label, from, to, rate, fromLabel, toLabel }) {
   return (
     <div className="bg-white/[.03] border border-white/[.06] rounded-xl p-4 flex flex-col gap-3">
-      <p className="text-slate-400 text-xs font-medium">{label}</p>
+      <p className="text-blue-400 text-xs font-medium">{label}</p>
       <div className="flex items-center gap-3">
         <div className="text-center">
           <div className="text-xl font-bold text-white">{from}</div>
@@ -260,6 +225,70 @@ function SentimentLegend({ color, label, count }) {
       <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: color }} />
       <span className="text-xs text-slate-400">{label}</span>
       <span className="text-xs text-slate-600 ml-auto">{count}</span>
+    </div>
+  )
+}
+
+// ── Peak Hours Line Chart ──────────────────────────────────────
+
+function PeakLineChart({ hours, hourLabel }) {
+  const W = 400
+  const H = 100
+  const PAD = { top: 8, bottom: 4, left: 2, right: 2 }
+  const counts = hours.map(h => h.count)
+  const maxVal = Math.max(...counts, 1)
+  const n = counts.length
+
+  const x = (i) => PAD.left + (i / (n - 1)) * (W - PAD.left - PAD.right)
+  const y = (v) => PAD.top + (1 - v / maxVal) * (H - PAD.top - PAD.bottom)
+
+  // Smooth cubic bezier path
+  let linePath = `M ${x(0)} ${y(counts[0])}`
+  for (let i = 1; i < n; i++) {
+    const cpx1 = (x(i - 1) + x(i)) / 2
+    const cpx2 = (x(i - 1) + x(i)) / 2
+    linePath += ` C ${cpx1} ${y(counts[i - 1])}, ${cpx2} ${y(counts[i])}, ${x(i)} ${y(counts[i])}`
+  }
+
+  // Area fill path (close to bottom)
+  const areaPath = `${linePath} L ${x(n - 1)} ${H} L ${x(0)} ${H} Z`
+
+  // Find peak index for dot
+  const peakIdx = counts.indexOf(maxVal)
+
+  return (
+    <div className="flex flex-col gap-2 mt-1">
+      <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="110" style={{ overflow: 'visible' }}>
+        <defs>
+          <linearGradient id="peakGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#2563eb" stopOpacity="0.3" />
+            <stop offset="100%" stopColor="#2563eb" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        {/* Area fill */}
+        <path d={areaPath} fill="url(#peakGrad)" />
+        {/* Line */}
+        <path d={linePath} fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        {/* Peak dot */}
+        {maxVal > 0 && (
+          <>
+            <circle cx={x(peakIdx)} cy={y(maxVal)} r="3.5" fill="#2563eb" />
+            <text
+              x={x(peakIdx)}
+              y={y(maxVal) - 8}
+              textAnchor="middle"
+              fill="#93c5fd"
+              fontSize="9"
+              fontWeight="600"
+            >
+              {hourLabel(hours[peakIdx].hour)} · {maxVal}
+            </text>
+          </>
+        )}
+      </svg>
+      <div className="flex justify-between text-xs text-slate-600">
+        <span>12a</span><span>6a</span><span>12p</span><span>6p</span><span>11p</span>
+      </div>
     </div>
   )
 }
