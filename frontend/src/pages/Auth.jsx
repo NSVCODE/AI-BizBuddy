@@ -118,8 +118,9 @@ export default function Auth() {
               </div>
             )}
 
-            <button type="submit" disabled={loading} className="btn-primary mt-1">
-              {loading ? 'Please wait...' : mode === 'signin' ? 'Sign In' : 'Create Account'}
+            <button type="submit" disabled={loading} className="btn-primary mt-1 flex items-center justify-center gap-2">
+              {loading && <span className="spinner-sm" style={{ borderTopColor: 'white' }} />}
+              {loading ? 'Please wait…' : mode === 'signin' ? 'Sign In' : 'Create Account'}
             </button>
           </form>
         </div>

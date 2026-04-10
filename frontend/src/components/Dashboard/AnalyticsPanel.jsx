@@ -26,7 +26,12 @@ export default function AnalyticsPanel({ businessId, onNavigate }) {
     }
   }
 
-  if (loading) return <p className="text-slate-500 text-sm">Loading analytics…</p>
+  if (loading) return (
+    <div className="flex items-center gap-3 py-12 justify-center">
+      <div className="spinner" />
+      <span className="text-slate-500 text-sm">Loading analytics…</span>
+    </div>
+  )
   if (!data) return <p className="text-slate-500 text-sm">Failed to load analytics.</p>
 
   const sentimentTotal = data.sentiment.positive + data.sentiment.neutral + data.sentiment.negative || 1

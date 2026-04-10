@@ -93,8 +93,9 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', background: 'var(--white)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Loading...</div>
+      <div style={{ minHeight: '100vh', background: 'var(--white)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
+        <div className="spinner" style={{ borderTopColor: 'var(--navy)', borderColor: 'rgba(0,0,0,0.08)', width: '28px', height: '28px' }} />
+        <div style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>Loading…</div>
       </div>
     )
   }

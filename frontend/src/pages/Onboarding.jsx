@@ -49,7 +49,7 @@ export default function Onboarding() {
 
       <div className={`w-full relative ${step === 1 ? 'max-w-2xl' : 'max-w-md'}`}>
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-8 step-in" key={`header-${step}`}>
           <div className="flex items-center gap-2.5 mb-4">
             <img src="/BizBuddy_Logo.png" alt="BizBuddy" className="h-8 w-auto" />
             <span className="text-blue-500 text-xs font-semibold tracking-widest uppercase">Setup</span>
@@ -70,14 +70,14 @@ export default function Onboarding() {
         {step < 3 && (
           <div className="flex gap-1.5 mb-8">
             {[1, 2].map(s => (
-              <div key={s} className={`h-0.5 w-8 rounded-full transition-colors ${s <= step ? 'bg-blue-500' : 'bg-white/10'}`} />
+              <div key={s} className={`h-0.5 w-8 rounded-full transition-all duration-300 ${s <= step ? 'bg-blue-500' : 'bg-white/10'}`} />
             ))}
           </div>
         )}
 
         {/* Step 1 — Type selection */}
         {step === 1 && (
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-3 gap-3 step-in">
             {TYPES.map(type => (
               <button
                 key={type.id}
@@ -95,7 +95,7 @@ export default function Onboarding() {
 
         {/* Step 2 — Details form */}
         {step === 2 && (
-          <div className="glass p-8 backdrop-blur-sm">
+          <div className="glass p-8 backdrop-blur-sm step-in">
             <div className="flex items-center justify-between pb-4 mb-6 border-b border-white/[.08]">
               <span className="text-sm font-semibold text-white">
                 {TYPES.find(t => t.id === selectedType)?.label}
@@ -126,8 +126,9 @@ export default function Onboarding() {
                 </div>
               )}
 
-              <button type="submit" disabled={loading} className="btn-primary mt-2">
-                {loading ? 'Setting up...' : 'Launch My BizBuddy'}
+              <button type="submit" disabled={loading} className="btn-primary mt-2 flex items-center justify-center gap-2">
+                {loading && <span className="spinner-sm" style={{ borderTopColor: 'white' }} />}
+                {loading ? 'Setting up…' : 'Launch My BizBuddy'}
               </button>
             </form>
           </div>
@@ -135,14 +136,17 @@ export default function Onboarding() {
 
         {/* Step 3 — Success */}
         {step === 3 && (
-          <div className="glass p-12 text-center backdrop-blur-sm">
+          <div className="glass p-12 text-center backdrop-blur-sm step-in">
             <div className="w-14 h-14 bg-blue-600/20 border border-blue-500/30 rounded-full flex items-center justify-center mx-auto mb-5">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#60A5FA" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="20,6 9,17 4,12" />
               </svg>
             </div>
             <h2 className="text-xl font-bold text-white mb-2">{form.name} is live on BizBuddy</h2>
-            <p className="text-slate-500 text-sm">Taking you to your dashboard...</p>
+            <p className="text-slate-500 text-sm mb-4">Taking you to your dashboard…</p>
+            <div className="flex justify-center">
+              <div className="spinner" />
+            </div>
           </div>
         )}
 

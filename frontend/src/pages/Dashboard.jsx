@@ -207,15 +207,27 @@ export default function Dashboard() {
             )}
             <button
               onClick={fetchAll}
-              className="text-xs text-slate-500 hover:text-white transition-colors px-3 py-1.5 rounded-lg border border-white/[.07] hover:bg-white/[.05]"
+              disabled={loading}
+              className="text-xs text-slate-500 hover:text-white transition-colors px-3 py-1.5 rounded-lg border border-white/[.07] hover:bg-white/[.05] flex items-center gap-1.5 disabled:opacity-50"
             >
-              Refresh
+              {loading
+                ? <><span className="spinner-sm" style={{ borderTopColor: '#64748b' }} /> Refreshing…</>
+                : 'Refresh'}
             </button>
           </div>
         </header>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto px-8 py-6">
+        <div className="flex-1 overflow-y-auto px-8 py-6 relative">
+
+          {loading && (
+            <div className="loading-overlay">
+              <div className="flex flex-col items-center gap-3">
+                <div className="spinner" style={{ width: 28, height: 28 }} />
+                <span className="text-xs text-slate-500">Loading…</span>
+              </div>
+            </div>
+          )}
 
           {active === 'overview' && (
             <div className="fade-in flex flex-col gap-6">
