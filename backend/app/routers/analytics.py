@@ -60,12 +60,9 @@ async def get_detailed():
     total_convs = len(conversations)
     messages_handled = sum(1 for m in messages if m["role"] == "assistant")
 
-    # Conversion rate: leads that became bookings (converted status)
-    converted = sum(1 for l in leads if l["status"] == "converted")
-    conversion_rate = round(converted / total_customers * 100, 1) if total_customers else 0.0
-
-    # Inquiries → bookings
+    # Inquiries → bookings (this IS the conversion rate — inquiries that became actual bookings)
     inq_rate = round(total_bookings / total_customers * 100, 1) if total_customers else 0.0
+    conversion_rate = inq_rate
 
     # Chats → purchases (bookings / conversations)
     chat_rate = round(total_bookings / total_convs * 100, 1) if total_convs else 0.0
