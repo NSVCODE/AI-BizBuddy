@@ -67,7 +67,7 @@ client.on('call', async (call) => {
   try {
     await client.sendMessage(
       from,
-      "Sorry we missed your call. I can assist you here over text—please let me know how I can help."
+      "Sorry we missed your call. I can assist you here over text! Please let me know how I can help you."
     )
     console.log(`[BizBuddy] Call auto-reply sent to ${from}`)
   } catch (err) {
@@ -179,7 +179,7 @@ async function pollMissedCalls() {
           repliedCallIds.add(msg.id._serialized)
           await client.sendMessage(
             msg.from,
-            "Sorry we missed your call. I can assist you here over text—please let me know how I can help."
+            "Sorry we missed your call. I can assist you here over text! Please let me know how I can help you."
           )
           console.log(`[BizBuddy] Missed call auto-reply sent to ${msg.from}`)
         }
