@@ -92,6 +92,8 @@ def create_booking(
     special_requests: Optional[str] = None,
     lead_id: Optional[str] = None,
     business_id: Optional[str] = None,
+    business_name: Optional[str] = None,
+    business_location: Optional[str] = None,
 ) -> dict:
     """
     Create a booking in Supabase.
@@ -117,12 +119,13 @@ def create_booking(
 
     # Format confirmation message
     day_name = datetime.strptime(booking_date, "%Y-%m-%d").strftime("%A, %B %d")
+    loc_line = f"📍 {business_name or RESTAURANT_CONFIG['name']}, {business_location or RESTAURANT_CONFIG['location']}\n"
     confirmation = (
         f"Booking confirmed! ✨\n"
         f"📅 {day_name} at {booking_time}\n"
         f"👥 {party_size} guest(s)\n"
-        f"📍 LatteLune, Indiranagar, Bengaluru\n"
-        f"📞 {phone}\n"
+        + loc_line
+        + f"📞 {phone}\n"
         + (f"📝 Notes: {special_requests}\n" if special_requests else "")
         + f"\nWe can't wait to see you! If you need to make any changes, feel free to message us here."
     )

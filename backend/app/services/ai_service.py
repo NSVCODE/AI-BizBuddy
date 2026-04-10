@@ -115,6 +115,11 @@ def build_system_prompt(business_id: str | None = None) -> str:
     faq_list = custom_faqs if custom_faqs else (cfg["faqs"] if biz_type == "restaurant" else [])
     faq_text = "\n".join(f"  Q: {f['question']}\n  A: {f['answer']}" for f in faq_list)
 
+    # Build slot times hint for booking policy
+    from app.config.restaurant import RESTAURANT_CONFIG as _cfg
+    slot_times = _cfg["booking_slots"]["slot_times"]
+    slot_times_str = ", ".join(slot_times)
+
     return f"""
 Current date and time: {datetime.now().strftime("%A, %B %d, %Y at %I:%M %p")}. Never accept or suggest bookings for dates or times that have already passed.
 
@@ -131,12 +136,13 @@ CRITICAL IDENTITY: You are the AI assistant for **{biz_name}** ONLY. Never menti
 ## Booking / Appointment Policy
 - Collect: customer name, phone number, preferred date, preferred time, and number of guests/people
 - Ask for ALL details in ONE message — do not ask one by one
-- Use check_availability then create_booking once you have all details
-- Confirm with a clear summary
+- Valid booking time slots (24-hour): {slot_times_str}. When the customer gives a time not in this list, pick the nearest slot and tell them.
+- CRITICAL: Once you have all 5 details (name, phone, date, time, guests), IMMEDIATELY call check_availability then create_booking. Do NOT ask the customer to confirm again or re-enter anything. Do NOT show a checklist asking for name/phone a second time. Just book it.
+- After create_booking succeeds, reply with the confirmation summary from the tool result.
 
 ## How to handle conversations
 1. Answer general questions using the information above.
-2. For bookings/appointments: ask for ALL details in a single message, then book.
+2. For bookings/appointments: ask for ALL details in a single message, then book immediately — no second confirmation step.
 3. For lead capture: use capture_lead once you have name + phone.
 4. Keep responses warm, concise, and friendly.
 5. NEVER share the business phone number or email address with customers. If they need to make changes, have further questions, or want to contact the business, always tell them to reply right here on WhatsApp.
@@ -228,6 +234,7 @@ def execute_tool(tool_name: str, tool_input: dict, channel: str = "web_chat", bu
             return json.dumps(result)
 
         elif tool_name == "create_booking":
+            _biz = _get_active_business(business_id)
             result = create_booking(
                 customer_name=tool_input["customer_name"],
                 phone=tool_input["phone"],
@@ -236,6 +243,8 @@ def execute_tool(tool_name: str, tool_input: dict, channel: str = "web_chat", bu
                 party_size=tool_input["party_size"],
                 special_requests=tool_input.get("special_requests"),
                 business_id=business_id,
+                business_name=_biz.get("name") if _biz else None,
+                business_location=_biz.get("location") if _biz else None,
             )
             # Also capture as a converted lead
             capture_lead(
