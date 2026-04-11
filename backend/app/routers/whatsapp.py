@@ -16,6 +16,20 @@ router = APIRouter(prefix="/api/whatsapp", tags=["whatsapp"])
 _wa_sessions: dict[str, str] = {}
 
 
+def _to_whatsapp_format(text: str) -> str:
+    """Convert markdown formatting to WhatsApp formatting.
+    WhatsApp uses *bold*, _italic_, ~strikethrough~ — not markdown **bold** or __italic__.
+    """
+    import re
+    # **bold** → *bold*
+    text = re.sub(r'\*\*(.+?)\*\*', r'*\1*', text)
+    # __italic__ → _italic_
+    text = re.sub(r'__(.+?)__', r'_\1_', text)
+    # Strip markdown headers (### Title → Title)
+    text = re.sub(r'^#{1,6}\s+', '', text, flags=re.MULTILINE)
+    return text
+
+
 def _get_session(phone: str) -> str:
     if phone not in _wa_sessions:
         _wa_sessions[phone] = f"wa_{phone.replace('+', '').replace(' ', '')}_{uuid.uuid4().hex[:8]}"
@@ -77,7 +91,7 @@ async def simulate_whatsapp_message(msg: WhatsAppMessage):
         ctx = _get_returning_customer_context(msg.phone)
         if ctx:
             message = f"{ctx}\n\n{msg.message}"
-    reply = process_message(session_id, message, channel="whatsapp", business_id="static")
+    reply = _to_whatsapp_format(process_message(session_id, message, channel="whatsapp", business_id="static"))
     return ChatResponse(session_id=session_id, reply=reply, channel="whatsapp")
 
 
@@ -100,7 +114,7 @@ async def handle_missed_call(req: MissedCallRequest):
         f"acknowledging the missed call, apologising briefly, and offering to help them with "
         f"anything. Keep it short and friendly.]"
     )
-    reply = process_message(session_id, trigger_message, channel="whatsapp", business_id="static")
+    reply = _to_whatsapp_format(process_message(session_id, trigger_message, channel="whatsapp", business_id="static"))
 
     return {
         "lead_id": lead.get("id"),
@@ -123,7 +137,7 @@ async def incoming_whatsapp_message(msg: WhatsAppMessage):
         ctx = _get_returning_customer_context(msg.phone)
         if ctx:
             message = f"{ctx}\n\n{msg.message}"
-    reply = process_message(session_id, message, channel="whatsapp", business_id="static")
+    reply = _to_whatsapp_format(process_message(session_id, message, channel="whatsapp", business_id="static"))
     return ChatResponse(session_id=session_id, reply=reply, channel="whatsapp")
 
 
